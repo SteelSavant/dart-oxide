@@ -17,3 +17,4 @@ dev_dependencies:
   test: ^1.21.0
   dart_oxide_module: ^0.1.0
   build_runner: ^2.3.3
+  spec: ^0.2.3

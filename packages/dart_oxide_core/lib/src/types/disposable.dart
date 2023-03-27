@@ -38,8 +38,7 @@ abstract class IAsyncDisposable<T extends Object> implements IDisposable<T> {
 
 // /// Also provides a finalizer to ensure that the `[dispose]` method is invoked when the object is no longer in scope and has not already been disposed.
 
-// ignore: mixin_super_class_constraint_non_interface
-mixin DisposableMixin<T extends Object> on T implements IDisposable<T> {
+mixin DisposableMixin<T extends Object> implements IDisposable<T> {
   // // TODO::verify the finalizer works as expected
   // static final Finalizer<IDisposable> _finalizer =
   //     Finalizer((disposable) => disposable.dispose());
@@ -80,5 +79,41 @@ mixin DisposableMixin<T extends Object> on T implements IDisposable<T> {
     _disposedTime = DateTime.now();
     _disposedTrace = Trace.current();
     // _finalizer.detach(this);
+  }
+}
+
+/// A disposable object that wraps a value of type `[T]` and calls a provided function when it is disposed.
+class SyncDisposable<T>
+    with DisposableMixin<SyncDisposable<T>>
+    implements ISyncDisposable<SyncDisposable<T>> {
+  final T value;
+  final void Function(T) onDispose;
+  SyncDisposable(
+    this.value, {
+    required this.onDispose,
+  });
+
+  @override
+  void dispose() {
+    super.dispose();
+    onDispose(value);
+  }
+}
+
+/// A disposable object that wraps a value of type `[T]` and calls a provided function when it is disposed.
+class AsyncDisposable<T>
+    with DisposableMixin<AsyncDisposable>
+    implements IAsyncDisposable<AsyncDisposable> {
+  final T value;
+  final Future<void> Function(T) onDispose;
+  AsyncDisposable(
+    this.value, {
+    required this.onDispose,
+  });
+
+  @override
+  Future<void> dispose() async {
+    await super.dispose();
+    await onDispose(value);
   }
 }

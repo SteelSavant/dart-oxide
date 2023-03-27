@@ -34,11 +34,12 @@ class Rc<R extends IDisposable<R>>
 
   @override
   Future<void> dispose() async {
+    final counts = _typedCounts;
     await super.dispose();
-    _typedCounts[_value.hashCode] = _typedCounts[_value.hashCode]! - 1;
+    counts[_value.hashCode] = counts[_value.hashCode]! - 1;
 
-    if (_typedCounts[_value.hashCode] == 0) {
-      _typedCounts.remove(_value.hashCode);
+    if (counts[_value.hashCode] == 0) {
+      counts.remove(_value.hashCode);
       return _value.dispose();
     }
   }
