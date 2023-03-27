@@ -1,0 +1,6 @@
+name: dart_oxide
+packages:
+  - packages/*
+ide:
+  intellij:
+    enabled: false

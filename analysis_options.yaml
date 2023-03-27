@@ -1,0 +1,91 @@
+include: package:lints/recommended.yaml
+analyzer:
+  exclude:
+    - lib/graphql/graphql_api.graphql.dart
+    - lib/graphql/graphql_api.graphql.g.dart
+    - lib/graphql/graphql_telemetry_api.graphql.dart
+    - lib/graphql/graphql_telemetry_api.graphql.g.dart
+    - lib/assets.dart
+    - lib/http_result.freezed.dart
+  errors:
+    await_only_futures: error
+    invalid_use_of_protected_member: error
+    iterable_contains_unrelated_type: error
+    list_remove_unrelated_type: error
+    must_be_immutable: error
+    must_call_super: error
+    unawaited_futures: error
+    unrelated_type_equality_checks: error
+
+    cancel_subscriptions: warning
+    close_sinks: warning
+    only_throw_errors: warning
+    prefer_typing_uninitialized_variables: warning
+    type_annotate_public_apis: warning
+
+  strong-mode:
+    implicit-casts: false
+    implicit-dynamic: false
+
+linter:
+  rules:
+    # error rule
+    avoid_dynamic_calls: true
+    avoid_empty_else: true
+    avoid_print: true
+    avoid_type_to_string: true
+    cancel_subscriptions: true
+    close_sinks: true
+    control_flow_in_finally: true
+    empty_statements: true
+    hash_and_equals: true
+    iterable_contains_unrelated_type: true
+    list_remove_unrelated_type: true
+    no_adjacent_strings_in_list: true
+    no_duplicate_case_values: true
+    prefer_void_to_null: true
+    test_types_in_equals: true
+    throw_in_finally: true
+    unnecessary_statements: true
+    unrelated_type_equality_checks: true
+    unsafe_html: true
+
+    # style rules
+    always_declare_return_types: true
+    always_put_required_named_parameters_first: true
+    avoid_equals_and_hash_code_on_mutable_classes: true
+    avoid_function_literals_in_foreach_calls: false
+    avoid_null_checks_in_equality_operators: true
+    avoid_shadowing_type_parameters: true
+    avoid_single_cascade_in_expression_statements: true
+    avoid_unused_constructor_parameters: true
+    avoid_void_async: true
+    await_only_futures: true
+    camel_case_types: true
+    deprecated_consistency: true
+    directives_ordering: true
+    file_names: true
+    implementation_imports: true
+    non_constant_identifier_names: true
+    only_throw_errors: true
+    prefer_const_constructors: true
+    prefer_const_constructors_in_immutables: true
+    prefer_const_declarations: true
+    prefer_final_in_for_each: true
+    prefer_final_locals: true
+    prefer_initializing_formals: true
+    prefer_is_empty: true
+    prefer_is_not_empty: true
+    prefer_is_not_operator: true
+    prefer_single_quotes: true
+    prefer_spread_collections: true
+    prefer_typing_uninitialized_variables: true
+    sort_child_properties_last: true
+    type_annotate_public_apis: true
+    unawaited_futures: true
+    unnecessary_brace_in_string_interps: true
+    unnecessary_getters_setters: true
+    unnecessary_lambdas: true
+    unnecessary_parenthesis: true
+    use_is_even_rather_than_modulo: true
+    void_checks: true

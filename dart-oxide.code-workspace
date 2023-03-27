@@ -1,0 +1,28 @@
+{
+    "folders": [
+        {
+            "path": "."
+        }
+    ],
+  "settings": {},
+  // add task to run flutter build_runner watch on startup
+  "tasks":  {
+	"version": "2.0.0",
+	"tasks": [
+	  {
+		"label": "build_runner watch core",
+		"type": "shell",
+		"command": "cd packages/dart_oxide_core && flutter pub run build_runner watch --delete-conflicting-outputs",
+		"runOptions": {
+			"instanceLimit": 1,
+			"runOn": "folderOpen",	
+		}
+	  },
+	  {
+		"label": "build_runner run core",
+		"type": "shell",
+		"command": "cd packages/dart_oxide_core && flutter pub run build_runner run --delete-conflicting-outputs",
+	  },
+	]
+  },
+}
