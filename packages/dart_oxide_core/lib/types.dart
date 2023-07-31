@@ -1,4 +1,3 @@
-export 'package:dart_oxide_core/src/pointers/ptr_ext.dart';
 export 'package:dart_oxide_core/src/types/newtype.dart';
 export 'package:dart_oxide_core/src/types/option/ext.dart';
 export 'package:dart_oxide_core/src/types/option/option.dart';
