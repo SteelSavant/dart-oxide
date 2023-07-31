@@ -40,7 +40,7 @@ extension StreamResult<R, E> on Stream<Result<R, E>> {
 
   Stream<R> takeWhileOk() => takeWhile((element) => element.isOk).whereOk();
 
-  Stream<R> skipWhileErr() => skipWhile((element) => element.isErr).whereOk();
+  Stream<Result<R, E>> skipWhileErr() => skipWhile((element) => element.isErr);
 
   Future<Result<List<R>, E>> collectResult() async {
     final list = <R>[];

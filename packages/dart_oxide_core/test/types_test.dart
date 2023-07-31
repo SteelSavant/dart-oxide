@@ -1362,6 +1362,20 @@ void main() {
 
       await expect(x.takeWhileOk().toList()).completion.toEqual([1]);
     });
+
+    test('Test Stream<Result<T, E>> skipWhileErr', () async {
+      final x = Stream.fromIterable(
+        [
+          const Result<int, String>.err('Error'),
+          const Result<int, String>.ok(1),
+          const Result<int, String>.err('Error2'),
+          const Result<int, String>.ok(2)
+        ],
+      );
+
+      await expect(x.skipWhileErr().toList()).completion.toEqual(
+          [const Result.ok(1), const Result.err('Error2'), const Result.ok(2)]);
+    });
   });
 
   group('Test UnitExt', () {
