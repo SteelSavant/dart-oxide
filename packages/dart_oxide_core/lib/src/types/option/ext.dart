@@ -65,6 +65,5 @@ extension StreamOption<T> on Stream<Option<T>> {
 
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
-  Stream<T> skipWhileNone() =>
-      skipWhile((element) => element.isNone).whereSome();
+  Stream<Option<T>> skipWhileNone() => skipWhile((element) => element.isNone);
 }

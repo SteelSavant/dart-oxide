@@ -11,7 +11,8 @@ sealed class Option<T> with _$Option<T> {
   const factory Option.some(T value) = Some<T>;
 
   /// Creates an [Option] that does not contain a value.
-  const factory Option.none() = None<T>;
+  /// Not const because of issues with const Option.none() being typed as Option\<Never\>.
+  factory Option.none() = None<T>;
 
   /// Returns T if the [Option] is [isSome], otherwise returns null.
   @pragma('vm:prefer-inline')
@@ -25,7 +26,7 @@ sealed class Option<T> with _$Option<T> {
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   factory Option.fromNullable(T? value) =>
-      value == null ? Option<T>.none() : Option<T>.some(value);
+      value == null ? Option.none() : Option<T>.some(value);
 
   /// Checks if the [Option] contains a value.
   @pragma('vm:prefer-inline')
@@ -52,11 +53,6 @@ sealed class Option<T> with _$Option<T> {
         Some(:final value) => value,
         None() => throw StateError(message),
       };
-
-  /// Convenience getter for [unwrap].
-  @pragma('vm:prefer-inline')
-  @pragma('dart2js:tryInline')
-  T get unwrapped => unwrap();
 
   /// Returns the value in the [Option] if it is [isSome], otherwise throws a [StateError].
   @pragma('vm:prefer-inline')

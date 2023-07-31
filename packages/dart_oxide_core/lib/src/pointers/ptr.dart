@@ -5,9 +5,9 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:stack_trace/stack_trace.dart';
 
 /// An interface for defining a class that can be disposed asynchronously. Accessing an [IDisposable] after calling [dispose], including calling [dispose] again, is undefined behavior.
-/// Return type is FutureOr<()> to allow unification with [IDisposable]; always treat it as a future.
 abstract interface class IAsyncDisposable {
   /// Disposes the object, preventing further use.
+  /// Return type is FutureOr<()> to allow unification with [IDisposable]; always treat it as a future.
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   FutureOr<()> dispose();
@@ -163,7 +163,7 @@ final class Cell<T, U extends FutureOr<()>> extends Box<T, U> {
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   @useResult
-  Result<(), StateError> mutate(T value) => _value != null
+  Result<(), StateError> mutate(T value) => _value == null
       ? Result.err(StateError(_errorMsg))
       : Result<T, StateError>.ok(_value = value).map((p0) => ());
 }

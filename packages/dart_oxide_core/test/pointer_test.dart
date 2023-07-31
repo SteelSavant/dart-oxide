@@ -27,7 +27,7 @@ class _AsyncDisposable implements IAsyncDisposable {
 }
 
 void main() {
-  group('Disposable tests', () {
+  group('Box tests', () {
     test('Test unwrap DisposableDisposableBox on sync disposable', () {
       final disposable = _SyncDisposable().toBox();
 
@@ -90,6 +90,132 @@ void main() {
       ];
 
       expect(disposables).isA<List<Box<_SyncDisposable, FutureOr<()>>>>();
+    });
+
+    group('Cell tests', () {
+      test('Test Cell mutate', () {
+        final cell = _AsyncDisposable().toCell();
+
+        expect(cell.unwrap().x).toEqual(1);
+        final result = cell.mutate(_AsyncDisposable()..x = 2);
+        expect(result.isOk).toEqual(true);
+        expect(cell.unwrap().x).toEqual(2);
+      });
+
+      test('Test Cell mutate on disposed', () async {
+        final cell = _SyncDisposable().toCell();
+
+        expect(cell.unwrap().x).toEqual(1);
+        cell.dispose();
+        final result = cell.mutate(_SyncDisposable()..x = 2);
+        expect(result.isErr).toEqual(true);
+        expect(cell.unwrap).throws.isStateError();
+      });
+    });
+
+    group('Rc tests', () {});
+
+    group('Ptr tests', () {
+      test('Test Ptr toCell', () {
+        final cell = Ptr(1).toCell();
+
+        expect(cell).isA<Cell<int, ()>>();
+        expect(cell.unwrap()).toEqual(1);
+      });
+
+      test('Test Ptr toBox', () {
+        final box = Ptr(1).toBox();
+
+        expect(box).isA<Box<int, ()>>();
+        expect(box.unwrap()).toEqual(1);
+      });
+
+      test('Test Ptr toRc', () {
+        final rc = Ptr(1).toRc();
+
+        expect(rc).isA<Rc<int, ()>>();
+        expect(rc.unwrap()).toEqual(1);
+      });
+
+      test('Test OptionPtr take from Some', () {
+        final ptr = Ptr(const Option.some(1));
+        final option = ptr.take();
+
+        expect(option).isA<Option<int>>();
+        expect(option.unwrap()).toEqual(1);
+        expect(ptr.value).isA<Option<int>>();
+        expect(ptr.value).toEqual(Option.none());
+      });
+
+      test('Test OptionPtr take from None', () {
+        final ptr = Ptr(Option<int>.none());
+        final option = ptr.take();
+
+        expect(option).isA<Option<int>>();
+        expect(option).toEqual(Option.none());
+        expect(ptr.value).isA<Option<int>>();
+        expect(ptr.value).toEqual(Option.none());
+      });
+
+      test('Test OptionPtr replace from Some', () {
+        final ptr = Ptr(const Option.some(1));
+        final option = ptr.replace(2);
+
+        expect(option).isA<Option<int>>();
+        expect(option.unwrap()).toEqual(1);
+        expect(ptr.value).isA<Option<int>>();
+        expect(ptr.value).toEqual(const Option.some(2));
+      });
+
+      test('Test OptionPtr replace from None', () {
+        final ptr = Ptr(Option<int>.none());
+        final option = ptr.replace(2);
+
+        expect(option).isA<Option<int>>();
+        expect(option).toEqual(Option.none());
+        expect(ptr.value).isA<Option<int>>();
+        expect(ptr.value).toEqual(const Option.some(2));
+      });
+
+      test('Test NullPtr take from NonNull', () {
+        final ptr = Ptr<int?>(1);
+        final value = ptr.take();
+
+        expect(value).toEqual(1);
+        expect(ptr.value).toEqual(null);
+      });
+
+      test('Test NullPtr take from Null', () {
+        final ptr = Ptr<int?>(null);
+        final value = ptr.take();
+
+        expect(value).toEqual(null);
+        expect(ptr.value).toEqual(null);
+      });
+
+      test('Test Ptr replace from NonNull', () {
+        final ptr = Ptr(1);
+        final value = ptr.replace(2);
+
+        expect(value).toEqual(1);
+        expect(ptr.value).toEqual(2);
+      });
+
+      test('Test Ptr replace from Null to NonNull', () {
+        final ptr = Ptr<int?>(null);
+        final value = ptr.replace(2);
+
+        expect(value).toEqual(null);
+        expect(ptr.value).toEqual(2);
+      });
+
+      test('Test Ptr replace from NonNull to Null', () {
+        final ptr = Ptr<int?>(1);
+        final value = ptr.replace(null);
+
+        expect(value).toEqual(1);
+        expect(ptr.value).toEqual(null);
+      });
     });
   });
 }
