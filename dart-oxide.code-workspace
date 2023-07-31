@@ -10,9 +10,15 @@
     "testOnSave.languageId": "dart",
     "triggerTaskOnSave.on": true,
     "triggerTaskOnSave.tasks": {
-      "Refresh Coverage": ["!**/*.g.dart", "!**/*.freezed.dart", "**/*.dart"]
+      "Refresh Coverage": ["!**/*.g.dart", "!**/*.freezed.dart", "**/*.dart"],
+      "Watch Core": ["packages/dart_oxide_core/*.yaml"]
     },
-    "triggerTaskOnSave.delay": 5000
+    "triggerTaskOnSave.delay": 5000,
+    "coverage-gutters.coverageBaseDir": "coverage/",
+    "coverage-gutters.coverageFileNames": ["coverage/lcov.info"],
+    "coverage-gutters.coverageReportFileName": "coverage/html/index.html",
+    "flutter-coverage.coverageFilePaths": ["coverage/"],
+    "flutter-coverage.coverageFileNames": ["lcov.info"]
   },
   "tasks": {
     "version": "2.0.0",
@@ -22,8 +28,12 @@
         "runOptions": {
           "runOn": "folderOpen"
         },
-        "dependsOn": ["New Terminal"],
+        "dependsOn": ["Kill Terminals", "New Terminal"],
         "dependsOrder": "sequence"
+      },
+      {
+        "label": "Kill Terminals",
+        "command": "${command:workbench.action.terminal.killAll}"
       },
       {
         "label": "New Terminal",
@@ -33,17 +43,7 @@
       },
       {
         "label": "Shell",
-        "linux": {
-          "command": "bash"
-        },
-        "windows": {
-          "command": "pwsh"
-        },
-        "osx": {
-          "command": "zsh"
-        },
-        "type": "shell",
-        "problemMatcher": [],
+        "command": "${command:workbench.action.terminal.new}",
         "presentation": {
           "group": "startup",
           "echo": false
