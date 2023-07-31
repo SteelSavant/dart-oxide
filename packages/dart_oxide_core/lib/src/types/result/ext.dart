@@ -45,20 +45,23 @@ extension StreamResult<R, E> on Stream<Result<R, E>> {
   Future<Result<List<R>, E>> collectResult() async {
     final list = <R>[];
 
-    return (await transform(
+    return transform(
       StreamTransformer.fromHandlers(
         handleData: (data, EventSink<Result<List<R>, E>> sink) {
           if (data.isOk) {
             list.add(data.unwrap());
           } else {
             sink
-              ..addError(Result<List<R>, E>.err(data.unwrapErr()))
+              ..add(Result<List<R>, E>.err(data.unwrapErr()))
               ..close();
           }
         },
-        handleDone: (sink) => sink.add(Result<List<R>, E>.ok(list)),
+        handleDone: (sink) {
+          sink
+            ..add(Result<List<R>, E>.ok(list))
+            ..close();
+        },
       ),
-    ).toList())
-        .first;
+    ).last;
   }
 }

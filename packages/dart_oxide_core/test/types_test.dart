@@ -1301,13 +1301,13 @@ void main() {
       expect(x.whereOkAnd((x) => x == 1)).toEqual([1]);
     });
 
-    test('Test Iterable<Result<T, E>> toResult no errors', () {
+    test('Test Iterable<Result<T, E>> collectResult no errors', () {
       const x = [Result<int, String>.ok(1), Result<int, String>.ok(2)];
 
       expect(x.collectResult()).toEqual(const Result.ok([1, 2]));
     });
 
-    test('Test Iterable<Result<T, E>> toResult with errors', () {
+    test('Test Iterable<Result<T, E>> collectResult with errors', () {
       const x = [Result<int, String>.ok(1), Result<int, String>.err('Error')];
 
       expect(x.collectResult()).toEqual(const Result.err('Error'));
@@ -1374,7 +1374,32 @@ void main() {
       );
 
       await expect(x.skipWhileErr().toList()).completion.toEqual(
-          [const Result.ok(1), const Result.err('Error2'), const Result.ok(2)]);
+        [const Result.ok(1), const Result.err('Error2'), const Result.ok(2)],
+      );
+    });
+
+    test('Test Stream<Result<T, E>> collectResult no errors', () async {
+      final x = Stream.fromIterable(
+        [const Result<int, String>.ok(1), const Result<int, String>.ok(2)],
+      );
+
+      await expect(x.collectResult())
+          .completion
+          .toEqual(const Result.ok([1, 2]));
+    });
+
+    test('Test Stream<Result<T, E>> collectResult with errors', () async {
+      final x = Stream.fromIterable(
+        [
+          const Result<int, String>.ok(1),
+          const Result<int, String>.err('Error'),
+          const Result<int, String>.ok(2)
+        ],
+      );
+
+      await expect(x.collectResult())
+          .completion
+          .toEqual(const Result.err('Error'));
     });
   });
 
