@@ -70,7 +70,7 @@ final class Box<T, U extends FutureOr<()>> implements IAsyncDisposable {
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   String get _errorMsg =>
-      'cannot use object after being disposed: $T first disposed at $_disposedTime\nfrom $_disposedTrace';
+      'cannot use object after being disposed: $T first disposed at $_disposedTime from $_disposedTrace';
 
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
@@ -228,7 +228,7 @@ final class Rc<T, U extends FutureOr<()>> extends Box<T, U> {
 
     final value = _dispose();
 
-    if (_count.value <= 0) {
+    if (_count.value == 0) {
       return _drop(value);
     } else {
       // this is a bit sketchy, but it appears to work
