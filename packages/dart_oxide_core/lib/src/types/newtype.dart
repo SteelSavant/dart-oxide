@@ -14,13 +14,13 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 /// assert(AccountId(5) != UserId(5))
 /// ```
 @immutable
-class NewType<TItem, TBrand> {
-  final TItem item;
-  const NewType(this.item);
+final class NewType<TItem, TBrand> {
+  final TItem $1;
+  const NewType(this.$1);
 
   @override
-  int get hashCode => item.hashCode;
+  int get hashCode => $1.hashCode;
   @override
   bool operator ==(Object? other) =>
-      other is NewType<TItem, TBrand> && other.item == item;
+      other is NewType<TItem, TBrand> && other.$1 == $1;
 }

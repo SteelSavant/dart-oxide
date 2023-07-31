@@ -4,3 +4,19 @@ packages:
 ide:
   intellij:
     enabled: false
+
+scripts:
+  build_runner_build:
+    run: dart run build_runner build --delete-conflicting-outputs
+    exec:
+      orderDependents: true
+  fix:
+    exec: dart format . && dart fix --apply && dart format .
+  format:
+    exec: dart format .
+
+
+  test_internal:
+    exec: dart pub global run full_coverage && flutter test --coverage --branch-coverage
+  test: 
+    run: melos run test_internal && dart scripts/combine_coverage.dart

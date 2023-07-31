@@ -1,2 +1,7 @@
 .dart_tool
 pubspec_overrides.yaml
+**/build/
+
+# code coverage
+**/coverage/
+**/full_coverage_test.dart

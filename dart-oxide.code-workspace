@@ -1,28 +1,63 @@
 {
-    "folders": [
-        {
-            "path": "."
-        }
-    ],
-  "settings": {},
-  // add task to run flutter build_runner watch on startup
-  "tasks":  {
-	"version": "2.0.0",
-	"tasks": [
-	  {
-		"label": "build_runner watch core",
-		"type": "shell",
-		"command": "cd packages/dart_oxide_core && flutter pub run build_runner watch --delete-conflicting-outputs",
-		"runOptions": {
-			"instanceLimit": 1,
-			"runOn": "folderOpen",	
-		}
-	  },
-	  {
-		"label": "build_runner run core",
-		"type": "shell",
-		"command": "cd packages/dart_oxide_core && flutter pub run build_runner run --delete-conflicting-outputs",
-	  },
-	]
+  "folders": [
+    {
+      "path": "."
+    }
+  ],
+  "settings": {
+    "testOnSave.testCommand": "melos run test",
+    "testOnSave.enabled": true,
+    "testOnSave.languageId": "dart"
   },
+  "tasks": {
+    "version": "2.0.0",
+    "tasks": [
+      {
+        "label": "Startup",
+        "runOptions": {
+          "runOn": "folderOpen"
+        },
+        "dependsOn": ["New Terminal"],
+        "dependsOrder": "sequence"
+      },
+      {
+        "label": "New Terminal",
+        "dependsOn": ["Watch Core", "Shell"],
+        "dependsOrder": "parallel",
+        "problemMatcher": []
+      },
+      {
+        "label": "Shell",
+        "linux": {
+          "command": "bash"
+        },
+        "windows": {
+          "command": "pwsh"
+        },
+        "osx": {
+          "command": "zsh"
+        },
+        "type": "shell",
+        "problemMatcher": [],
+        "presentation": {
+          "group": "startup",
+          "echo": false
+        },
+        "isBackground": true
+      },
+      {
+        "label": "Watch Core",
+        "type": "shell",
+        "command": "dart run build_runner watch --delete-conflicting-outputs",
+        "presentation": {
+          "group": "build_runner",
+          "echo": false
+        },
+        "options": {
+          "cwd": "${workspaceFolder}/packages/dart_oxide_core"
+        },
+        "isBackground": true
+      }
+    ]
+  }
 }
