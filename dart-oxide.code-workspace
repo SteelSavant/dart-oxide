@@ -4,6 +4,7 @@
       "path": "."
     }
   ],
+
   "settings": {
     "testOnSave.testCommand": "melos run test",
     "testOnSave.enabled": true,
@@ -18,7 +19,23 @@
     "coverage-gutters.coverageFileNames": ["lcov.info"],
     "coverage-gutters.coverageReportFileName": "coverage/html/index.html",
     "flutter-coverage.coverageFilePaths": ["coverage/"],
-    "flutter-coverage.coverageFileNames": ["lcov.info"]
+    "flutter-coverage.coverageFileNames": ["lcov.info"],
+    "[dart]": {
+      "editor.formatOnSave": true,
+      "editor.formatOnType": true,
+      "editor.codeActionsOnSave": {
+        "source.organizeImports": true,
+        "source.fixAll": true
+      },
+      "editor.rulers": [80],
+      "editor.suggestSelection": "first",
+      "editor.wordBasedSuggestions": false
+    },
+    "explorer.fileNesting.patterns": {
+      "*.dart": "${capture}.g.dart, ${capture}.freezed.dart"
+    },
+    "explorer.fileNesting.enabled": true,
+    "explorer.fileNesting.expand": false
   },
   "tasks": {
     "version": "2.0.0",
