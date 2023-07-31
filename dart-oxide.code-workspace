@@ -7,7 +7,12 @@
   "settings": {
     "testOnSave.testCommand": "melos run test",
     "testOnSave.enabled": true,
-    "testOnSave.languageId": "dart"
+    "testOnSave.languageId": "dart",
+    "triggerTaskOnSave.on": true,
+    "triggerTaskOnSave.tasks": {
+      "Refresh Coverage": ["!**/*.g.dart", "!**/*.freezed.dart", "**/*.dart"]
+    },
+    "triggerTaskOnSave.delay": 5000
   },
   "tasks": {
     "version": "2.0.0",
@@ -57,7 +62,21 @@
           "cwd": "${workspaceFolder}/packages/dart_oxide_core"
         },
         "isBackground": true
+      },
+      {
+        "label": "Refresh Coverage",
+        "command": "${command:flutter-coverage.refresh}",
+        "isBackground": true
       }
+    ]
+  },
+  "extensions": {
+    "recommendations": [
+      "dart-code.dart-code",
+      "flutterando.flutter-coverage",
+      "ryanluker.vscode-coverage-gutters",
+      "andifin.testonsave",
+      "gruntfuggly.triggertaskonsave"
     ]
   }
 }
