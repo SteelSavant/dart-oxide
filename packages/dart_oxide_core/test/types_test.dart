@@ -32,7 +32,7 @@ void main() {
     test('Test toOption on null', () {
       const int? x = null;
 
-      expect(x.toOption()).toEqual(Option<int>.none());
+      expect(x.toOption()).toEqual(const Option<int>.none());
     });
 
     test('Test toOption on non-null', () {
@@ -48,7 +48,7 @@ void main() {
     });
 
     test('Test toNullable on None', () {
-      final x = Option<int>.none();
+      const x = Option<int>.none();
 
       expect(x.toNullable()).toEqual(null);
     });
@@ -72,15 +72,15 @@ void main() {
     test('Test Option innequality with None', () {
       const x = Option.some(1);
 
-      final y = Option<int>.none();
+      const y = Option<int>.none();
 
       expect(x).not.toEqual(y);
     });
 
     test('Test Option equality with None', () {
-      final x = Option<int>.none();
+      const x = Option<int>.none();
 
-      final y = Option<int>.none();
+      const y = Option<int>.none();
 
       expect(x).toEqual(y);
     });
@@ -92,7 +92,7 @@ void main() {
     });
 
     test('Test isSome on None', () {
-      final x = Option<int>.none();
+      const x = Option<int>.none();
 
       expect(x.isSome).toEqual(false);
     });
@@ -104,7 +104,7 @@ void main() {
     });
 
     test('Test isNone on None', () {
-      final x = Option<int>.none();
+      const x = Option<int>.none();
 
       expect(x.isNone).toEqual(true);
     });
@@ -116,7 +116,7 @@ void main() {
     });
 
     test('Test isSomeAnd on None', () {
-      final x = Option<int>.none();
+      const x = Option<int>.none();
 
       expect(x.isSomeAnd((_) => true)).toEqual(false);
     });
@@ -134,7 +134,7 @@ void main() {
     });
 
     test('Test expect on None', () {
-      final x = Option<int>.none();
+      const x = Option<int>.none();
 
       expect(() => x.expect('Error')).throws.isStateError();
     });
@@ -146,7 +146,7 @@ void main() {
     });
 
     test('Test unwrap on None', () {
-      final x = Option<int>.none();
+      const x = Option<int>.none();
 
       expect(x.unwrap).throws.isStateError();
     });
@@ -158,7 +158,7 @@ void main() {
     });
 
     test('Test unwrapOr on None', () {
-      final x = Option<int>.none();
+      const x = Option<int>.none();
 
       expect(x.unwrapOr(2)).toEqual(2);
     });
@@ -170,7 +170,7 @@ void main() {
     });
 
     test('Test unwrapOrElse on None', () {
-      final x = Option<int>.none();
+      const x = Option<int>.none();
 
       expect(x.unwrapOrElse(() => 2)).toEqual(2);
     });
@@ -182,9 +182,9 @@ void main() {
     });
 
     test('Test map on None', () {
-      final x = Option<int>.none();
+      const x = Option<int>.none();
 
-      expect(x.map((x) => x + 1)).toEqual(Option.none());
+      expect(x.map((x) => x + 1)).toEqual(const Option.none());
     });
 
     test('Test inspect on Some', () {
@@ -200,7 +200,7 @@ void main() {
     });
 
     test('Test inspect on None', () {
-      final x = Option<int>.none();
+      const x = Option<int>.none();
       var y = 0;
 
       expect(
@@ -218,7 +218,7 @@ void main() {
     });
 
     test('Test mapOr on None', () {
-      final x = Option<int>.none();
+      const x = Option<int>.none();
 
       expect(x.mapOr((x) => x + 1, 5)).toEqual(const Option.some(5));
     });
@@ -230,7 +230,7 @@ void main() {
     });
 
     test('Test mapOrElse on None', () {
-      final x = Option<int>.none();
+      const x = Option<int>.none();
 
       expect(x.mapOrElse((x) => x + 1, () => 5)).toEqual(const Option.some(5));
     });
@@ -242,7 +242,7 @@ void main() {
     });
 
     test('Test okOr on None', () {
-      final x = Option<int>.none();
+      const x = Option<int>.none();
 
       expect(x.okOr(5)).toEqual(const Err(5));
     });
@@ -254,7 +254,7 @@ void main() {
     });
 
     test('Test okOrElse on None', () {
-      final x = Option<int>.none();
+      const x = Option<int>.none();
 
       expect(x.okOrElse(() => 5)).toEqual(const Err(5));
     });
@@ -266,7 +266,7 @@ void main() {
     });
 
     test('Test iter on None', () {
-      final x = Option<int>.none();
+      const x = Option<int>.none();
 
       expect(x.asIter().toList()).toEqual(const []);
     });
@@ -278,9 +278,9 @@ void main() {
     });
 
     test('Test and on None', () {
-      final x = Option<int>.none();
+      const x = Option<int>.none();
 
-      expect(x.and(const Option.some(2))).toEqual(Option.none());
+      expect(x.and(const Option.some(2))).toEqual(const Option.none());
     });
 
     test('Test andThen on Some', () {
@@ -291,9 +291,9 @@ void main() {
     });
 
     test('Test andThen on None', () {
-      final x = Option<int>.none();
+      const x = Option<int>.none();
 
-      expect(x.andThen((x) => Option.some(x + 1))).toEqual(Option.none());
+      expect(x.andThen((x) => Option.some(x + 1))).toEqual(const Option.none());
     });
 
     test('Test where on Some', () {
@@ -306,13 +306,13 @@ void main() {
       const x = Option.some(1);
       final v = x.where((x) => x == 2);
 
-      expect(v).toEqual(Option.none());
+      expect(v).toEqual(const Option.none());
     });
 
     test('Test where on None', () {
-      final x = Option<int>.none();
+      const x = Option<int>.none();
 
-      expect(x.where((x) => x == 1)).toEqual(Option.none());
+      expect(x.where((x) => x == 1)).toEqual(const Option.none());
     });
 
     test('Test or on Some', () {
@@ -322,7 +322,7 @@ void main() {
     });
 
     test('Test or on None', () {
-      final x = Option<int>.none();
+      const x = Option<int>.none();
 
       expect(x.or(const Option.some(2))).toEqual(const Option.some(2));
     });
@@ -335,7 +335,7 @@ void main() {
     });
 
     test('Test orElse on None', () {
-      final x = Option<int>.none();
+      const x = Option<int>.none();
 
       expect(x.orElse(() => const Option.some(2)))
           .toEqual(const Option.some(2));
@@ -344,11 +344,11 @@ void main() {
     test('Test xor Some on Some', () {
       const x = Option.some(1);
 
-      expect(x.xor(const Option.some(2))).toEqual(Option.none());
+      expect(x.xor(const Option.some(2))).toEqual(const Option.none());
     });
 
     test('Test xor Some on None', () {
-      final x = Option<int>.none();
+      const x = Option<int>.none();
 
       expect(x.xor(const Option.some(2))).toEqual(const Option.some(2));
     });
@@ -356,13 +356,13 @@ void main() {
     test('Test xor None on Some', () {
       const x = Option.some(1);
 
-      expect(x.xor(Option<int>.none())).toEqual(const Option.some(1));
+      expect(x.xor(const Option<int>.none())).toEqual(const Option.some(1));
     });
 
     test('Test xor None on None', () {
-      final x = Option<int>.none();
+      const x = Option<int>.none();
 
-      expect(x.xor(Option.none())).toEqual(Option.none());
+      expect(x.xor(const Option.none())).toEqual(const Option.none());
     });
 
     test('Test contains on Some', () {
@@ -378,7 +378,7 @@ void main() {
     });
 
     test('Test contains on None', () {
-      final x = Option<int>.none();
+      const x = Option<int>.none();
 
       expect(x.contains(1)).toEqual(false);
     });
@@ -390,21 +390,21 @@ void main() {
     });
 
     test('Test zip on None', () {
-      final x = Option<int>.none();
+      const x = Option<int>.none();
 
-      expect(x.zip(const Option.some(2))).toEqual(Option.none());
+      expect(x.zip(const Option.some(2))).toEqual(const Option.none());
     });
 
     test('Test zip on Some with None', () {
       const x = Option.some(1);
 
-      expect(x.zip(Option<int>.none())).toEqual(Option.none());
+      expect(x.zip(const Option<int>.none())).toEqual(const Option.none());
     });
 
     test('Test zip on None with None', () {
-      final x = Option<int>.none();
+      const x = Option<int>.none();
 
-      expect(x.zip(Option<int>.none())).toEqual(Option.none());
+      expect(x.zip(const Option<int>.none())).toEqual(const Option.none());
     });
 
     test('Test zipWith on Some', () {
@@ -415,24 +415,24 @@ void main() {
     });
 
     test('Test zipWith on None', () {
-      final x = Option<int>.none();
+      const x = Option<int>.none();
 
       expect(x.zipWith(const Option.some(2), (x, y) => x + y))
-          .toEqual(Option.none());
+          .toEqual(const Option.none());
     });
 
     test('Test zipWith on Some with None', () {
       const x = Option.some(1);
 
-      expect(x.zipWith(Option<int>.none(), (x, y) => x + y))
-          .toEqual(Option.none());
+      expect(x.zipWith(const Option<int>.none(), (x, y) => x + y))
+          .toEqual(const Option.none());
     });
 
     test('Test zipWith on None with None', () {
-      final x = Option<int>.none();
+      const x = Option<int>.none();
 
-      expect(x.zipWith(Option<int>.none(), (x, y) => x + y))
-          .toEqual(Option.none());
+      expect(x.zipWith(const Option<int>.none(), (x, y) => x + y))
+          .toEqual(const Option.none());
     });
 
     test('Test unzip on Some', () {
@@ -442,9 +442,9 @@ void main() {
     });
 
     test('Test unzip on None', () {
-      final x = Option<(int, int)>.none();
+      const x = Option<(int, int)>.none();
 
-      expect(x.unzip()).toEqual((Option.none(), Option.none()));
+      expect(x.unzip()).toEqual((const Option.none(), const Option.none()));
     });
 
     test('Test future on Some', () async {
@@ -454,9 +454,9 @@ void main() {
     });
 
     test('Test future on None', () async {
-      final x = Option<Future<int>>.none();
+      const x = Option<Future<int>>.none();
 
-      await expect(x.future).completion.toEqual(Option.none());
+      await expect(x.future).completion.toEqual(const Option.none());
     });
 
     test('Test transpose on Some Ok', () {
@@ -472,9 +472,9 @@ void main() {
     });
 
     test('Test transpose on None', () {
-      final x = Option<Result<int, String>>.none();
+      const x = Option<Result<int, String>>.none();
 
-      expect(x.transpose()).toEqual(Ok(Option<int>.none()));
+      expect(x.transpose()).toEqual(const Ok(Option<int>.none()));
     });
 
     test('Test Option unwrapOrDefault on Some', () {
@@ -484,9 +484,9 @@ void main() {
     });
 
     test('Test Option unwrapOrDefault on None', () {
-      final x = Option<Option<int>>.none();
+      const x = Option<Option<int>>.none();
 
-      expect(x.unwrapOrDefault()).toEqual(Option.none());
+      expect(x.unwrapOrDefault()).toEqual(const Option.none());
     });
 
     test('Test Option flatten on Some', () {
@@ -496,15 +496,15 @@ void main() {
     });
 
     test('Test Option flatten on None', () {
-      final x = Option<Option<int>>.none();
+      const x = Option<Option<int>>.none();
 
-      expect(x.flatten()).toEqual(Option.none());
+      expect(x.flatten()).toEqual(const Option.none());
     });
 
     test('Test Option flatten on Some of None', () {
-      final x = Option.some(Option<int>.none());
+      const x = Option.some(Option<int>.none());
 
-      expect(x.flatten()).toEqual(Option.none());
+      expect(x.flatten()).toEqual(const Option.none());
     });
 
     test('Test bool unwrapOrDefault on Some', () {
@@ -514,7 +514,7 @@ void main() {
     });
 
     test('Test bool unwrapOrDefault on None', () {
-      final x = Option<bool>.none();
+      const x = Option<bool>.none();
 
       expect(x.unwrapOrDefault()).toEqual(false);
     });
@@ -526,7 +526,7 @@ void main() {
     });
 
     test('Test int unwrapOrDefault on None', () {
-      final x = Option<int>.none();
+      const x = Option<int>.none();
 
       expect(x.unwrapOrDefault()).toEqual(0);
     });
@@ -538,7 +538,7 @@ void main() {
     });
 
     test('Test double unwrapOrDefault on None', () {
-      final x = Option<double>.none();
+      const x = Option<double>.none();
 
       expect(x.unwrapOrDefault()).toEqual(0.0);
     });
@@ -550,7 +550,7 @@ void main() {
     });
 
     test('Test num unwrapOrDefault on None', () {
-      final x = Option<num>.none();
+      const x = Option<num>.none();
 
       expect(x.unwrapOrDefault()).toEqual(0);
     });
@@ -562,7 +562,7 @@ void main() {
     });
 
     test('Test String unwrapOrDefault on None', () {
-      final x = Option<String>.none();
+      const x = Option<String>.none();
 
       expect(x.unwrapOrDefault()).toEqual('');
     });
@@ -574,7 +574,7 @@ void main() {
     });
 
     test('Test DateTime unwrapOrDefault on None', () {
-      final x = Option<DateTime>.none();
+      const x = Option<DateTime>.none();
 
       expect(x.unwrapOrDefault()).toEqual(DateTime(0));
     });
@@ -586,7 +586,7 @@ void main() {
     });
 
     test('Test List unwrapOrDefault on None', () {
-      final x = Option<List<int>>.none();
+      const x = Option<List<int>>.none();
 
       expect(x.unwrapOrDefault()).toEqual([]);
     });
@@ -598,7 +598,7 @@ void main() {
     });
 
     test('Test Map unwrapOrDefault on None', () {
-      final x = Option<Map<String, int>>.none();
+      const x = Option<Map<String, int>>.none();
 
       expect(x.unwrapOrDefault()).toEqual({});
     });
@@ -610,7 +610,7 @@ void main() {
     });
 
     test('Test Set unwrapOrDefault on None', () {
-      final x = Option<Set<int>>.none();
+      const x = Option<Set<int>>.none();
 
       expect(x.unwrapOrDefault()).toEqual({});
     });
@@ -622,7 +622,7 @@ void main() {
     });
 
     test('Test Iterable unwrapOrDefault on None', () {
-      final x = Option<Iterable<int>>.none();
+      const x = Option<Iterable<int>>.none();
 
       expect(x.unwrapOrDefault()).toEqual([]);
     });
@@ -634,7 +634,7 @@ void main() {
     });
 
     test('Test Stream unwrapOrDefault on None', () async {
-      final x = Option<Stream<int>>.none();
+      const x = Option<Stream<int>>.none();
 
       await expect(x.unwrapOrDefault().first).throws.isStateError();
     });
@@ -646,7 +646,7 @@ void main() {
     });
 
     test('Test Duration unwrapOrDefault on None', () {
-      final x = Option<Duration>.none();
+      const x = Option<Duration>.none();
 
       expect(x.unwrapOrDefault()).toEqual(Duration.zero);
     });
@@ -654,7 +654,7 @@ void main() {
     test('Test Iterable<Option<T>> whereSome', () {
       final x = [
         const Option.some(1),
-        Option<int>.none(),
+        const Option<int>.none(),
         const Option.some(2)
       ];
 
@@ -664,7 +664,7 @@ void main() {
     test('Test Iterable<Option<T>> whereSomeAnd', () {
       final x = [
         const Option.some(1),
-        Option<int>.none(),
+        const Option<int>.none(),
         const Option.some(2)
       ];
 
@@ -674,7 +674,7 @@ void main() {
     test('Test Iterable<Option<T>> mapWhereSome', () {
       final x = [
         const Option.some(1),
-        Option<int>.none(),
+        const Option<int>.none(),
         const Option.some(2)
       ];
 
@@ -683,7 +683,7 @@ void main() {
 
     test('Test Stream<Option<T>> whereSome', () async {
       final x = Stream.fromIterable(
-        [const Option.some(1), Option<int>.none(), const Option.some(2)],
+        [const Option.some(1), const Option<int>.none(), const Option.some(2)],
       );
 
       await expect(x.whereSome().toList()).completion.toEqual([1, 2]);
@@ -691,7 +691,7 @@ void main() {
 
     test('Test Stream<Option<T>> whereSomeAnd', () async {
       final x = Stream.fromIterable(
-        [const Option.some(1), Option<int>.none(), const Option.some(2)],
+        [const Option.some(1), const Option<int>.none(), const Option.some(2)],
       );
 
       await expect(x.whereSomeAnd((x) => x == 1).toList())
@@ -701,7 +701,7 @@ void main() {
 
     test('Test Stream<Option<T>> mapWhereSome', () async {
       final x = Stream.fromIterable(
-        [const Option.some(1), Option<int>.none(), const Option.some(2)],
+        [const Option.some(1), const Option<int>.none(), const Option.some(2)],
       );
 
       await expect(x.mapWhereSome((x) => x + 1).toList())
@@ -711,7 +711,7 @@ void main() {
 
     test('Test Stream<Option<T>> takeWhileSome', () async {
       final x = Stream.fromIterable(
-        [const Option.some(1), Option<int>.none(), const Option.some(2)],
+        [const Option.some(1), const Option<int>.none(), const Option.some(2)],
       );
 
       await expect(x.takeWhileSome().toList()).completion.toEqual([1]);
@@ -719,19 +719,19 @@ void main() {
 
     test('Test Stream<Option<T>> skipWhileNone start Some', () async {
       final x = Stream.fromIterable(
-        [const Option.some(1), Option<int>.none(), const Option.some(2)],
+        [const Option.some(1), const Option<int>.none(), const Option.some(2)],
       );
 
-      await expect(x.skipWhileNone().toList())
-          .completion
-          .toEqual([const Option.some(1), Option.none(), const Option.some(2)]);
+      await expect(x.skipWhileNone().toList()).completion.toEqual(
+        [const Option.some(1), const Option.none(), const Option.some(2)],
+      );
     });
 
     test('Test Stream<Option<T>> skipWhileNone start None', () async {
       final x = Stream.fromIterable(
         [
-          Option<int>.none(),
-          Option<int>.none(),
+          const Option<int>.none(),
+          const Option<int>.none(),
           const Option.some(1),
           const Option.some(2)
         ],
@@ -845,13 +845,13 @@ void main() {
     test('Test ok on Err', () {
       const x = Result<int, String>.err('Error');
 
-      expect(x.ok()).toEqual(Option.none());
+      expect(x.ok()).toEqual(const Option.none());
     });
 
     test('Test err on Ok', () {
       const x = Result<int, String>.ok(1);
 
-      expect(x.err()).toEqual(Option.none());
+      expect(x.err()).toEqual(const Option.none());
     });
 
     test('Test err on Err', () {
@@ -1146,9 +1146,9 @@ void main() {
     });
 
     test('Test transpose on Ok None', () {
-      final x = Result<Option<int>, String>.ok(Option<int>.none());
+      const x = Result<Option<int>, String>.ok(Option<int>.none());
 
-      expect(x.transpose()).toEqual(Option.none());
+      expect(x.transpose()).toEqual(const Option.none());
     });
 
     test('Test transpose on Err', () {

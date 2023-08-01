@@ -78,8 +78,27 @@ sealed class Option<T> with _$Option<T> {
   const factory Option.some(T value) = Some<T>;
 
   /// Creates an [Option] that does not contain a value.
-  /// Not const because of issues with const Option.none() being typed as Option\<Never\>.
-  factory Option.none() = None<T>;
+  const factory Option.none() = None<T>;
+
+  // Potential implementation to allow None<T> == None<Never> to get around const weirdness without inference checks.
+  // @override
+  // bool operator ==(dynamic other) =>
+  //     identical(this, other) ||
+  //     (other is Option &&
+  //         switch ((this, other)) {
+  //           (Some<T>(:final value), Some<T>(value: final otherValue)) =>
+  //             value == otherValue,
+  //           (None<T>(), None<Never>()) => true,
+  //           (None<Never>(), None<T>()) => true,
+  //           (None<T>(), None<T>()) => true,
+  //           _ => false,
+  //         });
+
+  // @override
+  // int get hashCode => switch (this) {
+  //       Some(:final value) => Object.hash(runtimeType, value),
+  //       None() => Object.hash(runtimeType, 157890234),
+  //     };
 
   /// Returns T if the [Option] is [isSome], otherwise returns null.
   @pragma('vm:prefer-inline')
@@ -93,7 +112,7 @@ sealed class Option<T> with _$Option<T> {
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   factory Option.fromNullable(T? value) =>
-      value == null ? Option.none() : Option<T>.some(value);
+      value == null ? Option<T>.none() : Option<T>.some(value);
 
   /// Checks if the [Option] contains a value.
   @pragma('vm:prefer-inline')
@@ -126,27 +145,27 @@ sealed class Option<T> with _$Option<T> {
   @pragma('dart2js:tryInline')
   T unwrap() => switch (this) {
         Some(:final value) => value,
-        None() => throw StateError('Option is None'),
+        None() =>
+          throw StateError('called `Option.unwrap()` on a `None` value'),
       };
 
   /// Returns the value in the [Option] if it is [isSome], otherwise returns the provided [or] value.
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
-  T unwrapOr(T or) => switch (this) {
+  T unwrapOr(T defaultValue) => switch (this) {
         Some(:final value) => value,
-        None() => or,
+        None() => defaultValue,
       };
 
   /// Returns the value in the [Option] if it is [isSome], otherwise returns the value returned by the provided [orElse] function.
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
-  T unwrapOrElse(T Function() orElse) => switch (this) {
+  T unwrapOrElse(T Function() fn) => switch (this) {
         Some(:final value) => value,
-        None() => orElse(),
+        None() => fn(),
       };
 
   /// Maps the value in the [Option] if it is [isSome], otherwise returns [Option.none].
-  @override
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   Option<R> map<R>(R Function(T) fn) => switch (this) {

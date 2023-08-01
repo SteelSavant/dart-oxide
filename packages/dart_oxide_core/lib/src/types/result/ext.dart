@@ -5,16 +5,24 @@ import 'package:dart_oxide_core/types.dart';
 extension IterableResult<R, E> on Iterable<Result<R, E>> {
   Iterable<R> whereOk() sync* {
     for (final option in this) {
-      if (option.isOk) {
-        yield option.unwrap();
+      switch (option) {
+        case Ok(:final value):
+          yield value;
+
+        default:
+          break;
       }
     }
   }
 
   Iterable<R> whereOkAnd(bool Function(R) predicate) sync* {
     for (final option in this) {
-      if (option.isOkAnd(predicate)) {
-        yield option.unwrap();
+      switch (option) {
+        case Ok(:final value) when predicate(value):
+          yield value;
+
+        default:
+          break;
       }
     }
   }
@@ -27,13 +35,26 @@ extension IterableResult<R, E> on Iterable<Result<R, E>> {
 }
 
 extension StreamResult<R, E> on Stream<Result<R, E>> {
-  Stream<R> whereOk() =>
-      where((result) => result.isOk).map((result) => result.unwrap());
+  Stream<R> whereOk() async* {
+    await for (final option in this) {
+      switch (option) {
+        case Ok(:final value):
+          yield value;
+
+        default:
+          break;
+      }
+    }
+  }
 
   Stream<R> whereOkAnd(bool Function(R) predicate) async* {
-    await for (final result in this) {
-      if (result.isOkAnd(predicate)) {
-        yield result.unwrap();
+    await for (final option in this) {
+      switch (option) {
+        case Ok(:final value) when predicate(value):
+          yield value;
+
+        default:
+          break;
       }
     }
   }

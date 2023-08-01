@@ -7,16 +7,24 @@ extension NullableExt<T> on T? {
 extension IterableOption<T> on Iterable<Option<T>> {
   Iterable<T> whereSome() sync* {
     for (final option in this) {
-      if (option.isSome) {
-        yield option.unwrap();
+      switch (option) {
+        case Some(:final value):
+          yield value;
+
+        case None():
+          break;
       }
     }
   }
 
   Iterable<T> whereSomeAnd(bool Function(T) predicate) sync* {
     for (final option in this) {
-      if (option.isSomeAnd(predicate)) {
-        yield option.unwrap();
+      switch (option) {
+        case Some(:final value) when predicate(value):
+          yield value;
+
+        default:
+          break;
       }
     }
   }
@@ -35,13 +43,26 @@ extension IterableOption<T> on Iterable<Option<T>> {
 }
 
 extension StreamOption<T> on Stream<Option<T>> {
-  Stream<T> whereSome() =>
-      where((option) => option.isSome).map((option) => option.unwrap());
+  Stream<T> whereSome() async* {
+    await for (final option in this) {
+      switch (option) {
+        case Some(:final value):
+          yield value;
+
+        case None():
+          break;
+      }
+    }
+  }
 
   Stream<T> whereSomeAnd(bool Function(T) predicate) async* {
     await for (final option in this) {
-      if (option.isSomeAnd(predicate)) {
-        yield option.unwrap();
+      switch (option) {
+        case Some(:final value) when predicate(value):
+          yield value;
+
+        default:
+          break;
       }
     }
   }

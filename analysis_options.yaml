@@ -5,7 +5,6 @@ analyzer:
     - '**/*.g.dart'
   errors:
     # error
-    avoid_web_libraries_in_flutter: error
     await_only_futures: error
     body_might_complete_normally: error
     body_might_complete_normally_catch_error: error

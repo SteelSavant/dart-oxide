@@ -53,7 +53,7 @@ abstract class Some<T> extends Option<T> {
 /// @nodoc
 
 class _$None<T> extends None<T> {
-  _$None() : super._();
+  const _$None() : super._();
 
   @override
   String toString() {
@@ -71,6 +71,6 @@ class _$None<T> extends None<T> {
 }
 
 abstract class None<T> extends Option<T> {
-  factory None() = _$None<T>;
-  None._() : super._();
+  const factory None() = _$None<T>;
+  const None._() : super._();
 }

@@ -233,17 +233,17 @@ void main() {
       expect(option).isA<Option<int>>();
       expect(option.unwrap()).toEqual(1);
       expect(ptr.value).isA<Option<int>>();
-      expect(ptr.value).toEqual(Option.none());
+      expect(ptr.value).toEqual(const Option.none());
     });
 
     test('Test OptionPtr take from None', () {
-      final ptr = Ptr(Option<int>.none());
+      final ptr = Ptr(const Option<int>.none());
       final option = ptr.take();
 
       expect(option).isA<Option<int>>();
-      expect(option).toEqual(Option.none());
+      expect(option).toEqual(const Option.none());
       expect(ptr.value).isA<Option<int>>();
-      expect(ptr.value).toEqual(Option.none());
+      expect(ptr.value).toEqual(const Option.none());
     });
 
     test('Test OptionPtr replace from Some', () {
@@ -257,11 +257,11 @@ void main() {
     });
 
     test('Test OptionPtr replace from None', () {
-      final ptr = Ptr(Option<int>.none());
+      final ptr = Ptr(const Option<int>.none());
       final option = ptr.replace(2);
 
       expect(option).isA<Option<int>>();
-      expect(option).toEqual(Option.none());
+      expect(option).toEqual(const Option.none());
       expect(ptr.value).isA<Option<int>>();
       expect(ptr.value).toEqual(const Option.some(2));
     });
