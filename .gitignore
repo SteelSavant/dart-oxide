@@ -6,9 +6,9 @@ pubspec_overrides.yaml
 **/coverage/
 **/full_coverage_test.dart
 
-# generated dart files
-**/*.g.dart
-**/*.freezed.dart
+# # generated dart files
+# **/*.g.dart
+# **/*.freezed.dart
 
 # generated doc files
 **/doc/
