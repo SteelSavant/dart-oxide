@@ -17,7 +17,7 @@ class SingleElementIter<T> with IterableMixin<T> {
   bool get isEmpty => _option.isNone;
 
   @override
-  bool get isNotEmpty => _option.isSome;
+  bool get isNotEmpty => !isEmpty;
 
   @override
   T get first => _option.unwrap();

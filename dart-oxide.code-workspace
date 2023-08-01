@@ -31,7 +31,8 @@
       "editor.wordBasedSuggestions": false
     },
     "explorer.fileNesting.patterns": {
-      "*.dart": "${capture}.g.dart, ${capture}.freezed.dart"
+      "*.dart": "${capture}.g.dart, ${capture}.freezed.dart",
+      "pubspec.yaml": "pubspec.lock"
     },
     "explorer.fileNesting.enabled": true,
     "explorer.fileNesting.expand": false

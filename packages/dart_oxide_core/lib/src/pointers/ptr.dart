@@ -127,13 +127,13 @@ final class Box<T, U extends FutureOr<()>> implements IAsyncDisposable {
   U dispose() => _drop(_dispose());
 }
 
-final class Cell<T, U extends FutureOr<()>> extends Box<T, U> {
-  Cell(super.value, {required super.onDispose});
+final class BoxMut<T, U extends FutureOr<()>> extends Box<T, U> {
+  BoxMut(super.value, {required super.onDispose});
 
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   @useResult
-  static Cell<T, ()> value<T>(T value) => Cell(
+  static BoxMut<T, ()> value<T>(T value) => BoxMut(
         value,
         onDispose: _unitFn,
       );
@@ -141,21 +141,22 @@ final class Cell<T, U extends FutureOr<()>> extends Box<T, U> {
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   @useResult
-  static Cell<T, FutureOr<()>> fromAsyncDisposable<T extends IAsyncDisposable>(
+  static BoxMut<T, FutureOr<()>>
+      fromAsyncDisposable<T extends IAsyncDisposable>(
     T value,
   ) =>
-      Cell<T, FutureOr<()>>(
-        value,
-        onDispose: (v) async => await v.dispose(),
-      );
+          BoxMut<T, FutureOr<()>>(
+            value,
+            onDispose: (v) async => await v.dispose(),
+          );
 
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   @useResult
-  static Cell<T, ()> fromDisposable<T extends IDisposable>(
+  static BoxMut<T, ()> fromDisposable<T extends IDisposable>(
     T value,
   ) =>
-      Cell<T, ()>(
+      BoxMut<T, ()>(
         value,
         onDispose: (v) => v.dispose(),
       );
@@ -249,7 +250,7 @@ class Ptr<T> {
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   @useResult
-  Cell<T, ()> toCell() => Cell.value(value);
+  BoxMut<T, ()> toBoxMut() => BoxMut.value(value);
 
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')

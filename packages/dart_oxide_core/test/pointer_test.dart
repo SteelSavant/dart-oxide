@@ -206,9 +206,9 @@ void main() {
 
   group('Ptr tests', () {
     test('Test Ptr toCell', () {
-      final cell = Ptr(1).toCell();
+      final cell = Ptr(1).toBoxMut();
 
-      expect(cell).isA<Cell<int, ()>>();
+      expect(cell).isA<BoxMut<int, ()>>();
       expect(cell.unwrap()).toEqual(1);
     });
 

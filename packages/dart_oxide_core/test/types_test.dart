@@ -262,13 +262,13 @@ void main() {
     test('Test iter on Some', () {
       const x = Option.some(1);
 
-      expect(x.asIter().toList()).toEqual(const [1]);
+      expect(x.iter.toList()).toEqual(const [1]);
     });
 
     test('Test iter on None', () {
       const x = Option<int>.none();
 
-      expect(x.asIter().toList()).toEqual(const []);
+      expect(x.iter.toList()).toEqual(const []);
     });
 
     test('Test and on Some', () {
@@ -365,24 +365,6 @@ void main() {
       expect(x.xor(const Option.none())).toEqual(const Option.none());
     });
 
-    test('Test contains on Some', () {
-      const x = Option.some(1);
-
-      expect(x.contains(1)).toEqual(true);
-    });
-
-    test('Test contains on Some that fails', () {
-      const x = Option.some(1);
-
-      expect(x.contains(2)).toEqual(false);
-    });
-
-    test('Test contains on None', () {
-      const x = Option<int>.none();
-
-      expect(x.contains(1)).toEqual(false);
-    });
-
     test('Test zip on Some', () {
       const x = Option.some(1);
 
@@ -450,13 +432,13 @@ void main() {
     test('Test future on Some', () async {
       final x = Option.some(Future.value(1));
 
-      await expect(x.future).completion.toEqual(const Option.some(1));
+      await expect(x.wait).completion.toEqual(const Option.some(1));
     });
 
     test('Test future on None', () async {
       const x = Option<Future<int>>.none();
 
-      await expect(x.future).completion.toEqual(const Option.none());
+      await expect(x.wait).completion.toEqual(const Option.none());
     });
 
     test('Test transpose on Some Ok', () {
@@ -475,18 +457,6 @@ void main() {
       const x = Option<Result<int, String>>.none();
 
       expect(x.transpose()).toEqual(const Ok(Option<int>.none()));
-    });
-
-    test('Test Option unwrapOrDefault on Some', () {
-      const x = Option.some(Option.some(1));
-
-      expect(x.unwrapOrDefault()).toEqual(const Option.some(1));
-    });
-
-    test('Test Option unwrapOrDefault on None', () {
-      const x = Option<Option<int>>.none();
-
-      expect(x.unwrapOrDefault()).toEqual(const Option.none());
     });
 
     test('Test Option flatten on Some', () {
@@ -565,18 +535,6 @@ void main() {
       const x = Option<String>.none();
 
       expect(x.unwrapOrDefault()).toEqual('');
-    });
-
-    test('Test DateTime unwrapOrDefault on Some', () {
-      final x = Option.some(DateTime(2020));
-
-      expect(x.unwrapOrDefault()).toEqual(DateTime(2020));
-    });
-
-    test('Test DateTime unwrapOrDefault on None', () {
-      const x = Option<DateTime>.none();
-
-      expect(x.unwrapOrDefault()).toEqual(DateTime(0));
     });
 
     test('Test List unwrapOrDefault on Some', () {
@@ -959,13 +917,13 @@ void main() {
     test('Test iter on Ok', () {
       const x = Result<int, String>.ok(1);
 
-      expect(x.asIter().toList()).toEqual(const [1]);
+      expect(x.iter.toList()).toEqual(const [1]);
     });
 
     test('Test iter on Err', () {
       const x = Result<int, String>.err('Error');
 
-      expect(x.asIter().toList()).toEqual(const []);
+      expect(x.iter.toList()).toEqual(const []);
     });
 
     test('Test expect on Ok', () {

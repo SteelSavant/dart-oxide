@@ -187,14 +187,7 @@ sealed class Result<R, E> with _$Result<R, E> {
 
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
-  SingleElementIter<R> asIter() => SingleElementIter(ok());
-
-  @pragma('vm:prefer-inline')
-  @pragma('dart2js:tryInline')
-  Result<R2, E2> cast<R2, E2>() => switch (this) {
-        Ok(:final value) => Result.ok(value as R2),
-        Err(:final error) => Result.err(error as E2),
-      };
+  Iterable<R> get iter => SingleElementIter(ok());
 
   /// Returns the value in the [Result] if it is [isOk], otherwise throws a [StateError] with the provided message.
   @pragma('vm:prefer-inline')
