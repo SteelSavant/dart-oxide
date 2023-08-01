@@ -262,13 +262,13 @@ void main() {
     test('Test iter on Some', () {
       const x = Option.some(1);
 
-      expect(x.iter()).toEqual(const [1]);
+      expect(x.asIter().toList()).toEqual(const [1]);
     });
 
     test('Test iter on None', () {
       final x = Option<int>.none();
 
-      expect(x.iter()).toEqual(const []);
+      expect(x.asIter().toList()).toEqual(const []);
     });
 
     test('Test and on Some', () {
@@ -959,13 +959,13 @@ void main() {
     test('Test iter on Ok', () {
       const x = Result<int, String>.ok(1);
 
-      expect(x.iter()).toEqual(const [1]);
+      expect(x.asIter().toList()).toEqual(const [1]);
     });
 
     test('Test iter on Err', () {
       const x = Result<int, String>.err('Error');
 
-      expect(x.iter()).toEqual(const []);
+      expect(x.asIter().toList()).toEqual(const []);
     });
 
     test('Test expect on Ok', () {

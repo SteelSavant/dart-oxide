@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:dart_oxide_core/src/types/option/option.dart';
+import 'package:dart_oxide_core/src/types/single_element_iterator.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'result.freezed.dart';
@@ -123,6 +124,7 @@ sealed class Result<R, E> with _$Result<R, E> {
       };
 
   /// Maps the value in the [Result] if it is [isOk], otherwise returns [Result.err].
+  @override
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   Result<R2, E> map<R2>(R2 Function(R) fn) => switch (this) {
@@ -185,9 +187,13 @@ sealed class Result<R, E> with _$Result<R, E> {
 
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
-  Iterable<R> iter() => switch (this) {
-        Ok(:final value) => [value],
-        Err() => [],
+  SingleElementIter<R> asIter() => SingleElementIter(ok());
+
+  @pragma('vm:prefer-inline')
+  @pragma('dart2js:tryInline')
+  Result<R2, E2> cast<R2, E2>() => switch (this) {
+        Ok(:final value) => Result.ok(value as R2),
+        Err(:final error) => Result.err(error as E2),
       };
 
   /// Returns the value in the [Result] if it is [isOk], otherwise throws a [StateError] with the provided message.
@@ -269,8 +275,8 @@ sealed class Result<R, E> with _$Result<R, E> {
 
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
-  bool contains(R other) => switch (this) {
-        Ok(:final value) => value == other,
+  bool contains(R element) => switch (this) {
+        Ok(:final value) => value == element,
         Err() => false,
       };
 

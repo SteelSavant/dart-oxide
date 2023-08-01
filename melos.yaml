@@ -26,3 +26,6 @@ scripts:
     exec: dart pub global run full_coverage && flutter test --coverage --branch-coverage
   test: 
     run: melos run test_internal && dart scripts/combine_coverage.dart
+
+  doc: 
+    exec: dart doc .

@@ -1,7 +1,74 @@
 import 'package:dart_oxide_core/src/types/result/result.dart';
+import 'package:dart_oxide_core/src/types/single_element_iterator.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'option.freezed.dart';
+
+/// An optional value.
+///
+/// Type [Option] represents an optional value; every [Option] is either [Some] and contains a value, or [None], and does not.
+///
+/// [Option]s are commonly paired with pattern matching to query the presence
+/// of a value and take action, always accounting for the [`None`] case.
+///
+/// ```
+/// Option<double> divide(double numerator, double denominator) {
+///     if denominator == 0.0 {
+///         Option.none()
+///     } else {
+///         Option.some(numerator / denominator)
+///     }
+/// }
+///
+/// // The return value of the function is an option
+/// final result = divide(2.0, 3.0);
+///
+/// // Pattern match to retrieve the value
+/// switch(result) {
+///     // The division was valid
+///     Some(:final value) => print("Result: $value"),
+///     // The division was invalid
+///     None() => print("Cannot divide by 0"),
+/// }
+/// ```
+///
+/// # Comparison to [T?]
+///
+/// [Option] is very similar to [T?], but with a few key differences:
+///
+/// * [Option] is composable, nullable types are not. For example, Option\<Option\<T\>\> is a valid type, but T?? is not.
+/// * The [None] value of different types do not are not equivalent, whereas any null value will be equivalent, regardless of the type [T]. For example, Option\<int\>.none() is not the same as Option\<String\>.none().
+/// * Extensions on [Object?] apply to non-nullable objects as well, whereas extensions on [Option<T>] only apply to [Option]s. This prevents polluting the global namespace with extensions that only apply to nullable types.
+
+/// ## Performance considerations compared to [T?]
+///
+/// Due to the nature of Dart's type system, both the [Some] and [None] variants of [Option] allocate an object.
+/// Additionally, the [None] variant is not `const` to avoid issues with `const Option.none()` creating a [None<Never>], which can cause runtime type issues.
+/// While this is not a problem for most use cases, it can be a problem in performance-critical code.
+///
+/// [Option]
+///
+/// # Method overview
+///
+/// In addition to working with pattern matching, [Option] provides a wide
+/// variety of different methods.
+///
+/// ## Querying the variant
+///
+/// The [isSome] and [isNone] methods return [true] if the [Option]
+/// is [Some] or [None], respectively.
+///
+///  ## Extracting the contained value
+///
+/// These methods extract the contained value in an [Option<T>] when it
+/// is the [Some] variant. If the [Option] is [None]:
+///
+/// * [expect] throws a StateError with a provided custom message
+/// * [unwrap] throws a StateError with a generic message
+/// * [unwrapOr] returns the provided default value
+/// * [unwrapOrElse] returns the result of evaluating the provided function
+/// * [unwrapOrDefault] is implemented as an extension on many primitive types. It returns a practical default value if the [Option] is [None].
+//
 
 @freezed
 sealed class Option<T> with _$Option<T> {
@@ -79,6 +146,7 @@ sealed class Option<T> with _$Option<T> {
       };
 
   /// Maps the value in the [Option] if it is [isSome], otherwise returns [Option.none].
+  @override
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   Option<R> map<R>(R Function(T) fn) => switch (this) {
@@ -131,13 +199,6 @@ sealed class Option<T> with _$Option<T> {
 
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
-  Iterable<T> iter() => switch (this) {
-        Some(:final value) => [value],
-        None() => [],
-      };
-
-  @pragma('vm:prefer-inline')
-  @pragma('dart2js:tryInline')
   Option<R> and<R>(Option<R> other) => switch (this) {
         Some() => other,
         None() => Option<R>.none(),
@@ -150,14 +211,6 @@ sealed class Option<T> with _$Option<T> {
   Option<R> andThen<R>(Option<R> Function(T) fn) => switch (this) {
         Some(:final value) => fn(value),
         None() => Option<R>.none(),
-      };
-
-  /// Returns the [Option] if it is [isSome] and matches [predicate], otherwise returns [Option.none]. Analagous to [Option.filter] in Rust.
-  @pragma('vm:prefer-inline')
-  @pragma('dart2js:tryInline')
-  Option<T> where(bool Function(T) predicate) => switch (this) {
-        Some(:final value) => predicate(value) ? this : Option<T>.none(),
-        None() => Option<T>.none(),
       };
 
   @pragma('vm:prefer-inline')
@@ -182,12 +235,35 @@ sealed class Option<T> with _$Option<T> {
           ? other
           : Option<T>.none();
 
+  // Iterator and related overrides
+
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
-  bool contains(T other) => switch (this) {
-        Some(:final value) => value == other,
+  SingleElementIter<T> asIter() => SingleElementIter(this);
+
+  @pragma('vm:prefer-inline')
+  @pragma('dart2js:tryInline')
+  Option<R> cast<R>() => switch (this) {
+        Some(:final value) => Option.some(value as R),
+        None() => Option<R>.none(),
+      };
+
+  @pragma('vm:prefer-inline')
+  @pragma('dart2js:tryInline')
+  bool contains(T element) => switch (this) {
+        Some(:final value) => value == element,
         None() => false,
       };
+
+  /// Returns the [Option] if it is [isSome] and matches [predicate], otherwise returns [Option.none]. Analagous to [Option.filter] in Rust.
+  @pragma('vm:prefer-inline')
+  @pragma('dart2js:tryInline')
+  Option<T> where(bool Function(T) predicate) => switch (this) {
+        Some(:final value) => predicate(value) ? this : Option<T>.none(),
+        None() => Option<T>.none(),
+      };
+
+  // zip and unzip
 
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
