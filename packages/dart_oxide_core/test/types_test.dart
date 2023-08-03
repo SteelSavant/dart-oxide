@@ -214,25 +214,25 @@ void main() {
     test('Test mapOr on Some', () {
       const x = Option.some(1);
 
-      expect(x.mapOr((x) => x + 1, 5)).toEqual(const Option.some(2));
+      expect(x.mapOr(map: (x) => x + 1, or: 5)).toEqual(2);
     });
 
     test('Test mapOr on None', () {
       const x = Option<int>.none();
 
-      expect(x.mapOr((x) => x + 1, 5)).toEqual(const Option.some(5));
+      expect(x.mapOr(map: (x) => x + 1, or: 5)).toEqual(5);
     });
 
     test('Test mapOrElse on Some', () {
       const x = Option.some(1);
 
-      expect(x.mapOrElse((x) => x + 1, () => 5)).toEqual(const Option.some(2));
+      expect(x.mapOrElse(map: (x) => x + 1, orElse: () => 5)).toEqual(2);
     });
 
     test('Test mapOrElse on None', () {
       const x = Option<int>.none();
 
-      expect(x.mapOrElse((x) => x + 1, () => 5)).toEqual(const Option.some(5));
+      expect(x.mapOrElse(map: (x) => x + 1, orElse: () => 5)).toEqual(5);
     });
 
     test('Test okOr on Some', () {

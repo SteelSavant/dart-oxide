@@ -66,40 +66,58 @@ part 'option.freezed.dart';
 /// * [unwrap] throws a StateError with a generic message
 /// * [unwrapOr] returns the provided default value
 /// * [unwrapOrElse] returns the result of evaluating the provided function
-/// * [unwrapOrDefault] is implemented as an extension on many primitive types. It returns a practical default value if the [Option] is [None].
-//
-
+/// * `unwrapOrDefault` is available as an extension on many primitive types. It returns a practical default value if the [Option] is [None].
+///
+/// ## Transforming contained values
+///
+/// These Methods transform [Option] to [Result]:
+///
+/// * [okOr] transforms [Option] to [Result] by mapping [Some] to [Ok] and [None] to [Err(err)] using the provided default [err] value.
+/// * [okOrElse] transforms [Option] to [Result] by mapping [Some] to [Ok] and [None] to [Err(err())] using the provided default [err] function.
+/// * [transpose] transposes an [Option] of a [Result] into a [Result] of an [Option].
+///
+/// TODO::finsih method overview
 @freezed
 sealed class Option<T> with _$Option<T> {
   const Option._();
 
   /// Creates an [Option] that contains a value.
+  /// Equivalent to invoking the [Some] constructor directly.
+  ///
+  /// # Examples
+  ///
+  /// ```dart
+  /// final x = Option<int>.some(2);
+  /// final y = Some(2);
+  ///
+  /// assert(x == y);
+  /// ```
   const factory Option.some(T value) = Some<T>;
 
   /// Creates an [Option] that does not contain a value.
+  /// Equivalent to invoking the [None] constructor directly.
+  ///
+  /// # Examples
+  ///
+  /// ```dart
+  /// final x = Option<int>.none();
+  /// final y = None<int>();
+  ///
+  /// assert(x == y);
+  /// ```
   const factory Option.none() = None<T>;
 
-  // Potential implementation to allow None<T> == None<Never> to get around const weirdness without inference checks.
-  // @override
-  // bool operator ==(dynamic other) =>
-  //     identical(this, other) ||
-  //     (other is Option &&
-  //         switch ((this, other)) {
-  //           (Some<T>(:final value), Some<T>(value: final otherValue)) =>
-  //             value == otherValue,
-  //           (None<T>(), None<Never>()) => true,
-  //           (None<Never>(), None<T>()) => true,
-  //           (None<T>(), None<T>()) => true,
-  //           _ => false,
-  //         });
-
-  // @override
-  // int get hashCode => switch (this) {
-  //       Some(:final value) => Object.hash(runtimeType, value),
-  //       None() => Object.hash(runtimeType, 157890234),
-  //     };
-
-  /// Returns T if the [Option] is [isSome], otherwise returns null.
+  /// If the option is [Some], returns the contained value, otherwise returns null.
+  ///
+  /// # Examples
+  ///
+  /// ```dart
+  /// final x = Some(2);
+  /// final y = None<int>();
+  ///
+  /// assert(x.toNullable() == 2);
+  /// assert(y.toNullable() == null);
+  /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   T? toNullable() => switch (this) {
@@ -107,23 +125,63 @@ sealed class Option<T> with _$Option<T> {
         None() => null,
       };
 
-  ///Creates an option that is Some if the value is not null, otherwise None.
+  ///Creates an option that is [Some] containing [value] if [value] is not null, otherwise [None].
+  ///
+  /// # Examples
+  ///
+  /// ```dart
+  /// final x = Option.fromNullable(2);
+  /// final y = Option.fromNullable(null);
+  ///
+  /// assert(x == Some(2));
+  /// assert(y == None<int>());
+  /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   factory Option.fromNullable(T? value) =>
       value == null ? Option<T>.none() : Option<T>.some(value);
 
-  /// Checks if the [Option] contains a value.
+  /// Returns [true] if the option is a [Some] value.
+  ///
+  /// # Examples
+  ///
+  /// ```dart
+  /// final x = Some(2);
+  /// final y = None<int>();
+  ///
+  /// assert(x.isSome == true);
+  /// assert(y.isSome == false);
+  /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   bool get isSome => this is Some<T>;
 
-  /// Checks if the [Option] does not contain a value.
+  /// Returns [true] if the option is a [None] value.
+  ///
+  /// # Examples
+  /// ```
+  /// final x = Some(2);
+  /// final y = None<int>();
+  ///
+  /// assert(x.isNone == false);
+  /// assert(y.isNone == true);
+  /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
-  bool get isNone => this is None<T>;
+  bool get isNone => !isSome;
 
-  /// Checks if the [Option] contains a value that satisfies the given [predicate].
+  /// Checks if the [Option] is [Some] and contains a value that satisfies the given [predicate].
+  ///
+  /// # Examples
+  ///
+  /// ```
+  /// final x = Some(2);
+  /// final y = None<int>();
+  ///
+  /// assert(x.isSomeAnd((a) => a == 2) == true);
+  /// assert(x.isSomeAnd((a) => a == 3) == false);
+  /// assert(y.isSomeAnd((a) => a == 2) == false);
+  /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   bool isSomeAnd(bool Function(T) predicate) => switch (this) {
@@ -131,7 +189,25 @@ sealed class Option<T> with _$Option<T> {
         None() => false,
       };
 
-  /// Returns the value in the [Option] if it is [isSome], otherwise throws a [StateError] with the provided message.
+  /// Returns the value in the [Option] if it is [Some], otherwise throws a [StateError] with the provided message.
+  ///
+  /// # Throws
+  ///
+  /// Throws a [StateError] with the provided message if the [Option] is [None].
+  ///
+  /// # Examples
+  ///
+  /// ```dart
+  /// final fridgeContents = "food";
+  /// final x = Some(fridgeContents);
+  /// assert(x.expect("fridge should not be empty") == "food");
+  ///
+  /// final y = None<String>();
+  /// y.expect("fridge should not be empty"); // throws StateError
+  /// ```
+  ///
+  /// We recommend that [expect] messages are used to describe the reason you
+  /// _expect_ the [Option] should be [Some].
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   T expect(String message) => switch (this) {
@@ -139,7 +215,26 @@ sealed class Option<T> with _$Option<T> {
         None() => throw StateError(message),
       };
 
-  /// Returns the value in the [Option] if it is [isSome], otherwise throws a [StateError].
+  /// Returns the value in the [Option] if it is [Some], otherwise throws a [StateError].
+  ///
+  /// Because this funciton may throw, its use is generally discouraged.
+  /// Instead, prefer to use pattern matching and handle the [None] case explicitly,
+  /// or call [unwrapOr] or [unwrapOrElse] to provide a default value. Some primitive types
+  /// also provide an [unwrapOrDefault] extension method to provide a default value.
+  ///
+  /// # Throws
+  ///
+  /// Throws a [StateError] if the [Option] is [None].
+  ///
+  /// # Examples
+  ///
+  /// ```
+  /// final x = Some("air");
+  /// assert(x.unwrap() == "air");
+  ///
+  /// final y = None<String>();
+  /// y.unwrap(); // throws StateError
+  /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   T unwrap() => switch (this) {
@@ -148,7 +243,20 @@ sealed class Option<T> with _$Option<T> {
           throw StateError('called `Option.unwrap()` on a `None` value'),
       };
 
-  /// Returns the value in the [Option] if it is [isSome], otherwise returns the provided [or] value.
+  /// Returns the contained [Some] value or a provided default.
+  ///
+  /// Arguments passed to `unwrapOr` are eagerly evaluated; if you are passing
+  /// the result of a function call, it is recommended to use [unwrapOrElse],
+  /// which is lazily evaluated.
+  ///
+  /// # Examples
+  /// ```
+  /// final x = Some("value");
+  /// assert(x.unwrapOr("default") == "value");
+  ///
+  /// final y = None<String>();
+  /// assert(y.unwrapOr("default") == "default");
+  /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   T unwrapOr(T defaultValue) => switch (this) {
@@ -156,7 +264,19 @@ sealed class Option<T> with _$Option<T> {
         None() => defaultValue,
       };
 
-  /// Returns the value in the [Option] if it is [isSome], otherwise returns the value returned by the provided [orElse] function.
+  /// Returns the contained [Some] value or computes it from a closure.
+  ///
+  /// # Examples
+  ///
+  /// ```
+  /// final k = 10;
+  ///
+  /// final x = Some(4);
+  /// assert(x.unwrapOrElse(() => 2 * k) == 4);
+  ///
+  /// final y = None<int>();
+  /// assert(y.unwrapOrElse(() => 2 * k) == 20);
+  /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   T unwrapOrElse(T Function() fn) => switch (this) {
@@ -164,7 +284,17 @@ sealed class Option<T> with _$Option<T> {
         None() => fn(),
       };
 
-  /// Maps the value in the [Option] if it is [isSome], otherwise returns [Option.none].
+  /// Maps an [Option<T>] to [Option<U>] by applying a function to a contained value (if [Some]) or returns [None] (if [None]).
+  ///
+  /// # Examples
+  ///
+  /// ```dart
+  /// final x = Some(5);
+  /// assert(x.map((a) => a * 2) == Some(10));
+  ///
+  /// final y = None<int>();
+  /// assert(y.map((a) => a * 2) == None<int>());
+  /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   Option<R> map<R>(R Function(T) fn) => switch (this) {
@@ -172,7 +302,17 @@ sealed class Option<T> with _$Option<T> {
         None() => Option<R>.none(),
       };
 
-  /// Calls the provided [fn] if the [Option] is [isSome], and returns the [Option] itself.
+  /// Calls the provided [fn] with [value] if the [Option] is [Some], and returns the [Option] itself.
+  ///
+  /// # Examples
+  ///
+  /// ```dart
+  /// // prints "Some(1)"
+  /// print(Some(1).inspect(print));
+  ///
+  /// // prints nothing
+  /// print(None().inspect(print));
+  /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   Option<T> inspect(void Function(T) fn) {
@@ -186,21 +326,70 @@ sealed class Option<T> with _$Option<T> {
     return this;
   }
 
+  /// Returns the provided default result (if none),
+  /// or applies a transformation function to the contained value (if any).
+  ///
+  /// Arguments passed to `mapOr` are eagerly evaluated; if you are passing
+  /// the result of a function call, it is recommended to use [mapOrElse],
+  /// which is lazily evaluated.
+  ///
+  /// # Examples
+  /// ```
+  /// const k = 21;
+  ///
+  /// final x = Some("foo");
+  /// assert(x.mapOr(or: 2 * k, map: (a) => a.length) == 3);
+  ///
+  /// final y = None<String>();
+  /// assert(y.mapOr(or: 2 * k, map: (a) => a.length) == 42);
+  /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
-  Option<R> mapOr<R>(R Function(T) fn, R or) => switch (this) {
-        Some(:final value) => Option.some(fn(value)),
-        None() => Option.some(or),
+  R mapOr<R>({required R Function(T) map, required R or}) => switch (this) {
+        Some(:final value) => map(value),
+        None() => or,
       };
 
+  /// Computes a default function result (if none), or
+  /// applies a transformation function to the contained value (if any).
+  ///
+  /// # Examples
+  /// ```
+  /// const k = 21;
+  ///
+  /// final x = Some("foo");
+  /// assert(x.mapOrElse(orElse: () => 2 * k, map:(a) => a.length) == 3);
+  ///
+  /// final y = None<String>();
+  /// assert(y.mapOrElse(orElse: () => 2 * k, map: (a) => a.length) == 42);
+  /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
-  Option<R> mapOrElse<R>(R Function(T) fn, R Function() orElse) =>
+  R mapOrElse<R>({
+    required R Function(T) map,
+    required R Function() orElse,
+  }) =>
       switch (this) {
-        Some(:final value) => Option.some(fn(value)),
-        None() => Option.some(orElse()),
+        Some(:final value) => map(value),
+        None() => orElse(),
       };
 
+  /// Transforms the [Option<T>] into a [Result<T, E>], mapping [Some(v)] to
+  /// [Ok(v)] and [None] to [Err(err)].
+  ///
+  /// Arguments passed to `okOrElse` are eagerly evaluated; if you are passing
+  /// the result of a function call, it is recommended to use [okOrElse],
+  /// which is lazily evaluated.
+  ///
+  /// # Examples
+  ///
+  /// ```
+  /// final x = Some('foo');
+  /// assert(x.okOr('bar') == Ok('foo'));
+  ///
+  /// final y = None<String>();
+  /// assert(y.okOr('bar') == Err('bar'));
+  /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   Result<T, E> okOr<E>(E error) => switch (this) {
@@ -208,11 +397,23 @@ sealed class Option<T> with _$Option<T> {
         None() => Result.err(error),
       };
 
+  /// Transforms the [Option<T>] into a [Result<T, E>], mapping [Some(v)] to
+  /// [Ok(v)] and [None] to [Err(err())].
+  ///
+  /// # Examples
+  ///
+  /// ```
+  /// final x = Some('foo');
+  /// assert(x.okOrElse(() => 'bar') == Ok('foo'));
+  ///
+  /// final y = None<String>();
+  /// assert(y.okOrElse(() => 'bar') == Err('bar'));
+  /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
-  Result<T, E> okOrElse<E>(E Function() orElse) => switch (this) {
+  Result<T, E> okOrElse<E>(E Function() fn) => switch (this) {
         Some(:final value) => Result.ok(value),
-        None() => Result.err(orElse()),
+        None() => Result.err(fn()),
       };
 
   /// Returns an iterator over the possibly contained value.
