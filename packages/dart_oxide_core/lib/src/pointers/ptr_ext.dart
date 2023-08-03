@@ -1,9 +1,35 @@
 import 'dart:async';
 
-import 'package:dart_oxide_core/pointers.dart';
+import 'package:dart_oxide_core/src/pointers/ptr.dart';
 import 'package:dart_oxide_core/types.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 // TODO::annotation to force users to box/cell constructed disposable types
+
+/// Runs the given [action] with the given [resource] and then disposes it.
+/// The [action] must be synchronous.
+R using<T extends IDisposable, R>(
+  T resource,
+  R Function(T) action,
+) {
+  try {
+    return action(resource);
+  } finally {
+    resource.dispose();
+  }
+}
+
+/// Runs the given [action] with the given [resource] and then disposes it.
+/// Any of the [action] or the [resource] may be asynchronous.
+Future<R> usingAsync<T extends IAsyncDisposable, R>(
+  T resource,
+  FutureOr<R> Function(T) action,
+) async {
+  try {
+    return await action(resource);
+  } finally {
+    await resource.dispose();
+  }
+}
 
 extension IDisposableExt<T extends IDisposable> on T {
   @pragma('vm:prefer-inline')
@@ -14,7 +40,7 @@ extension IDisposableExt<T extends IDisposable> on T {
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   @useResult
-  BoxMut<T, ()> toCell() => BoxMut.fromDisposable(this);
+  Rc<T, ()> toRc() => Rc.fromDisposable(this);
 }
 
 extension IAsyncDisposableExt<T extends IAsyncDisposable> on T {
@@ -26,7 +52,7 @@ extension IAsyncDisposableExt<T extends IAsyncDisposable> on T {
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   @useResult
-  BoxMut<T, FutureOr<()>> toCell() => BoxMut.fromAsyncDisposable(this);
+  Rc<T, FutureOr<()>> toRc() => Rc.fromAsyncDisposable(this);
 }
 
 extension OptionPtrExt<T> on Ptr<Option<T>> {

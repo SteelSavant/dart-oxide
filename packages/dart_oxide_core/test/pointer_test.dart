@@ -1,3 +1,5 @@
+// TODO:: create pointer tests to test finalizer that run in vm_service (https://stackoverflow.com/questions/63730179/can-we-force-the-dart-garbage-collector)
+
 import 'dart:async';
 
 import 'package:dart_oxide_core/pointers.dart';
@@ -136,27 +138,6 @@ void main() {
     });
   });
 
-  group('Cell tests', () {
-    test('Test Cell mutate', () {
-      final cell = _AsyncDisposable().toCell();
-
-      expect(cell.unwrap().x).toEqual(1);
-      final result = cell.mutate(_AsyncDisposable()..x = 2);
-      expect(result.isOk).toEqual(true);
-      expect(cell.unwrap().x).toEqual(2);
-    });
-
-    test('Test Cell mutate on disposed', () async {
-      final cell = _SyncDisposable().toCell();
-
-      expect(cell.unwrap().x).toEqual(1);
-      cell.dispose();
-      final result = cell.mutate(_SyncDisposable()..x = 2);
-      expect(result.isErr).toEqual(true);
-      expect(cell.unwrap).throws.isStateError();
-    });
-  });
-
   group('Rc tests', () {
     test('Test clone', () {
       final rc = Rc.fromDisposable(_SyncDisposable());
@@ -205,13 +186,6 @@ void main() {
   });
 
   group('Ptr tests', () {
-    test('Test Ptr toCell', () {
-      final cell = Ptr(1).toBoxMut();
-
-      expect(cell).isA<BoxMut<int, ()>>();
-      expect(cell.unwrap()).toEqual(1);
-    });
-
     test('Test Ptr toBox', () {
       final box = Ptr(1).toBox();
 

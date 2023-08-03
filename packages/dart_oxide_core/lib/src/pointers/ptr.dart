@@ -4,6 +4,8 @@ import 'package:dart_oxide_core/types.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:stack_trace/stack_trace.dart';
 
+part 'ptr.freezed.dart';
+
 /// An interface for defining a class that can be disposed asynchronously. Accessing an [IDisposable] after calling [dispose], including calling [dispose] again, is undefined behavior.
 abstract interface class IAsyncDisposable {
   /// Disposes the object, preventing further use.
@@ -23,49 +25,73 @@ abstract interface class IDisposable implements IAsyncDisposable {
 
 () _unitFn(void _) => ();
 
+@freezed
+class _BoxFinalizable<T> with _$_BoxFinalizable<T> {
+  const _BoxFinalizable._();
+
+  const factory _BoxFinalizable({
+    required T value,
+    required void Function(T) onFinalize,
+  }) = _BoxFinalizableImpl;
+
+  void finalize() => onFinalize(value);
+}
+
+@unfreezed
+class _CountedBoxFinalizable<T>
+    with _$_CountedBoxFinalizable<T>
+    implements _BoxFinalizable<T> {
+  const _CountedBoxFinalizable._();
+
+  factory _CountedBoxFinalizable({
+    @freezed required T value,
+    @freezed required final void Function(T) onFinalize,
+    @freezed required final Ptr<int> count,
+    required bool isFinalized,
+  }) = _CountedBoxFinalizableImpl;
+
+  @override
+  void finalize() {
+    if (count.value <= 0 && !isFinalized) {
+      isFinalized = true;
+      onFinalize(value);
+    }
+  }
+}
+
 /// Protects a value that needs to be disposed, and tracks whether or not it has been disposed.
 /// [()] is used instead of [void] to prevent collections from unifying to [void] instead of [FutureOr<void>].
-final class Box<T, U extends FutureOr<()>> implements IAsyncDisposable {
-  // TODO::figure out how to make this work with a Finalizer (or if that would even be beneficial)
-
+abstract final class BaseBox<T, U extends FutureOr<()>>
+    implements IAsyncDisposable {
+  static final Finalizer<_BoxFinalizable<dynamic>> _finalizer =
+      Finalizer((value) => value.finalize());
   T? _value;
   final U Function(T) _drop;
 
   late Trace _disposedTrace;
   late DateTime _disposedTime;
 
-  Box(
+  @mustBeOverridden
+  _BoxFinalizable<T> _createFinalizable();
+
+  BaseBox(
     T value, {
     required U Function(T) onDispose,
+
+    /// Attach this box to a finalizer, which will call [onDispose]
+    /// on the stored [value] when the the box becomes unreachable and
+    /// the finalizer is run.
+    bool finalize = true,
   })  : _value = value,
-        _drop = onDispose;
-
-  static Box<T, ()> value<T>(T value) => Box(
-        value,
-        onDispose: _unitFn,
+        _drop = onDispose {
+    if (finalize) {
+      _finalizer.attach(
+        this,
+        _createFinalizable(),
+        detach: this,
       );
-
-  @pragma('vm:prefer-inline')
-  @pragma('dart2js:tryInline')
-  @useResult
-  static Box<T, FutureOr<()>> fromAsyncDisposable<T extends IAsyncDisposable>(
-    T value,
-  ) =>
-      Box<T, FutureOr<()>>(
-        value,
-        onDispose: (v) async => await v.dispose(),
-      );
-
-  @pragma('vm:prefer-inline')
-  @pragma('dart2js:tryInline')
-  @useResult
-  static Box<T, ()> fromDisposable<T extends IDisposable>(
-    T value,
-  ) =>
-      Box<T, ()>(
-        value,
-        onDispose: (v) => v.dispose(),
-      );
+    }
+  }
 
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
@@ -114,6 +140,7 @@ final class Box<T, U extends FutureOr<()>> implements IAsyncDisposable {
   @pragma('dart2js:tryInline')
   T _dispose() {
     final value = unwrap();
+    _finalizer.detach(this);
     _value = null;
     _disposedTime = DateTime.now();
     _disposedTrace = Trace.current();
@@ -127,76 +154,87 @@ final class Box<T, U extends FutureOr<()>> implements IAsyncDisposable {
   U dispose() => _drop(_dispose());
 }
 
-final class BoxMut<T, U extends FutureOr<()>> extends Box<T, U> {
-  BoxMut(super.value, {required super.onDispose});
+final class Box<T, U extends FutureOr<()>> extends BaseBox<T, U> {
+  Box(super.value, {required super.onDispose, super.finalize});
 
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   @useResult
-  static BoxMut<T, ()> value<T>(T value) => BoxMut(
+  static Box<T, ()> value<T>(T value) => Box(
         value,
         onDispose: _unitFn,
+        finalize: false,
       );
 
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   @useResult
-  static BoxMut<T, FutureOr<()>>
-      fromAsyncDisposable<T extends IAsyncDisposable>(
-    T value,
-  ) =>
-          BoxMut<T, FutureOr<()>>(
-            value,
-            onDispose: (v) async => await v.dispose(),
-          );
+  static Box<T, FutureOr<()>> fromAsyncDisposable<T extends IAsyncDisposable>(
+    T value, {
+    bool finalize = true,
+  }) =>
+      Box<T, FutureOr<()>>(
+        value,
+        onDispose: (v) async => await v.dispose(),
+        finalize: finalize,
+      );
 
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   @useResult
-  static BoxMut<T, ()> fromDisposable<T extends IDisposable>(
-    T value,
-  ) =>
-      BoxMut<T, ()>(
+  static Box<T, ()> fromDisposable<T extends IDisposable>(
+    T value, {
+    bool finalize = true,
+  }) =>
+      Box<T, ()>(
         value,
         onDispose: (v) => v.dispose(),
+        finalize: finalize,
       );
 
-  @pragma('vm:prefer-inline')
-  @pragma('dart2js:tryInline')
-  @useResult
-  Result<(), StateError> mutate(T value) => _value == null
-      ? Result.err(StateError(_errorMsg))
-      : Result<T, StateError>.ok(_value = value).map((p0) => ());
+  @override
+  _BoxFinalizable<T> _createFinalizable() => _BoxFinalizable(
+        value: unwrap(),
+        onFinalize: _drop,
+      );
 }
 
-final class Rc<T, U extends FutureOr<()>> extends Box<T, U> {
+final class Rc<T, U extends FutureOr<()>> extends BaseBox<T, U> {
   Ptr<int> _count = Ptr(1);
 
-  Rc(super.value, {required super.onDispose});
+  Rc(super.value, {required super.onDispose, super.finalize});
 
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   @useResult
   static Rc<T, FutureOr<()>> fromAsyncDisposable<T extends IAsyncDisposable>(
-    T value,
-  ) =>
+    T value, {
+    bool finalize = true,
+  }) =>
       Rc<T, FutureOr<()>>(
         value,
         onDispose: (v) async => await v.dispose(),
+        finalize: finalize,
       );
 
-  Rc._cloned(super.value, Ptr<int> count, {required super.onDispose})
-      : _count = count;
+  Rc._cloned(
+    super.value,
+    Ptr<int> count, {
+    required super.onDispose,
+    super.finalize,
+  }) : _count = count;
 
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   @useResult
   static Rc<T, ()> fromDisposable<T extends IDisposable>(
-    T value,
-  ) =>
+    T value, {
+    bool finalize = true,
+  }) =>
       Rc<T, ()>(
         value,
         onDispose: (v) => v.dispose(),
+        finalize: finalize,
       );
 
   @pragma('vm:prefer-inline')
@@ -205,6 +243,15 @@ final class Rc<T, U extends FutureOr<()>> extends Box<T, U> {
   static Rc<T, ()> value<T>(T value) => Rc(
         value,
         onDispose: _unitFn,
+        finalize: false,
+      );
+
+  @override
+  _BoxFinalizable<T> _createFinalizable() => _CountedBoxFinalizable(
+        value: unwrap(),
+        onFinalize: _drop,
+        count: _count,
+        isFinalized: false,
       );
 
   @pragma('vm:prefer-inline')
@@ -246,11 +293,6 @@ class Ptr<T> {
   T value;
 
   Ptr(this.value);
-
-  @pragma('vm:prefer-inline')
-  @pragma('dart2js:tryInline')
-  @useResult
-  BoxMut<T, ()> toBoxMut() => BoxMut.value(value);
 
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
