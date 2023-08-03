@@ -639,6 +639,22 @@ void main() {
       expect(x.mapWhereSome((x) => x + 1)).toEqual([2, 3]);
     });
 
+    test('Test Iterable<Option<T>> collectOption', () {
+      final x = [const Option.some(1), const Option.some(2)];
+
+      expect(x.collectOption()).toEqual(const Option.some([1, 2]));
+    });
+
+    test('Test Iterable<Option<T>> collectOption with None', () {
+      final x = [
+        const Option.some(1),
+        const Option<int>.none(),
+        const Option.some(2)
+      ];
+
+      expect(x.collectOption()).toEqual(const Option.none());
+    });
+
     test('Test Stream<Option<T>> whereSome', () async {
       final x = Stream.fromIterable(
         [const Option.some(1), const Option<int>.none(), const Option.some(2)],
@@ -665,6 +681,15 @@ void main() {
       await expect(x.mapWhereSome((x) => x + 1).toList())
           .completion
           .toEqual([2, 3]);
+    });
+
+    test('Test Stream<Option<T>> collectOption', () async {
+      final x =
+          Stream.fromIterable([const Option.some(1), const Option.some(2)]);
+
+      await expect(x.collectOption())
+          .completion
+          .toEqual(const Option.some([1, 2]));
     });
 
     test('Test Stream<Option<T>> takeWhileSome', () async {

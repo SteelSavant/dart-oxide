@@ -76,7 +76,7 @@ part 'option.freezed.dart';
 /// * [okOrElse] transforms [Option] to [Result] by mapping [Some] to [Ok] and [None] to [Err(err())] using the provided default [err] function.
 /// * [transpose] transposes an [Option] of a [Result] into a [Result] of an [Option].
 ///
-/// TODO::finsih method overview
+/// TODO::finish method overview
 @freezed
 sealed class Option<T> with _$Option<T> {
   const Option._();

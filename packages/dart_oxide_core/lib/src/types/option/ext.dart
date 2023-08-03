@@ -1,10 +1,26 @@
 import 'package:dart_oxide_core/types.dart';
 
-extension NullableExt<T> on T? {
+/// Extensions on [T?] to convert to [Option<T>].
+extension NullableToOptionExt<T> on T? {
+  /// Converts [this] to [Option<T>].
+  /// If [this] is `null`, returns [None], otherwise returns [Some(this)].
+  ///
+  /// # Examples
+  ///
+  /// ```dart
+  /// final some = 1.toOption();
+  /// final none = null.toOption();
+  ///
+  /// assert(some == Some(1));
+  /// assert(none.isNone);
+  /// ```
   Option<T> toOption() => Option.fromNullable(this);
 }
 
+/// Extensions on [Iterable<Option\<T\>>].
+/// Provides additional methods for mapping and filtering based on the [Option] variant.
 extension IterableOption<T> on Iterable<Option<T>> {
+  
   Iterable<T> whereSome() sync* {
     for (final option in this) {
       switch (option) {
@@ -39,6 +55,22 @@ extension IterableOption<T> on Iterable<Option<T>> {
           break;
       }
     }
+  }
+
+  Option<List<T>> collectOption() {
+    final list = <T>[];
+
+    for (final option in this) {
+      switch (option) {
+        case Some(:final value):
+          list.add(value);
+
+        case None():
+          return None<List<T>>();
+      }
+    }
+
+    return Some(list);
   }
 }
 
@@ -77,6 +109,22 @@ extension StreamOption<T> on Stream<Option<T>> {
           break;
       }
     }
+  }
+
+  Future<Option<List<T>>> collectOption() async {
+    final list = <T>[];
+
+    await for (final option in this) {
+      switch (option) {
+        case Some(:final value):
+          list.add(value);
+
+        case None():
+          return None<List<T>>();
+      }
+    }
+
+    return Some(list);
   }
 
   @pragma('vm:prefer-inline')
