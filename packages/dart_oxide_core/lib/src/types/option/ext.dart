@@ -20,7 +20,6 @@ extension NullableToOptionExt<T> on T? {
 /// Extensions on [Iterable<Option\<T\>>].
 /// Provides additional methods for mapping and filtering based on the [Option] variant.
 extension IterableOption<T> on Iterable<Option<T>> {
-  
   Iterable<T> whereSome() sync* {
     for (final option in this) {
       switch (option) {

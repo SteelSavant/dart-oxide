@@ -124,7 +124,6 @@ sealed class Result<R, E> with _$Result<R, E> {
       };
 
   /// Maps the value in the [Result] if it is [isOk], otherwise returns [Result.err].
-  @override
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   Result<R2, E> map<R2>(R2 Function(R) fn) => switch (this) {
@@ -135,20 +134,20 @@ sealed class Result<R, E> with _$Result<R, E> {
   /// Maps the value in the [Result] if it is [isOk], otherwise returns [or].
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
-  R2 mapOr<R2>(R2 Function(R) fn, R2 or) => switch (this) {
-        Ok(:final value) => fn(value),
+  R2 mapOr<R2>({required R2 Function(R) map, required R2 or}) => switch (this) {
+        Ok(:final value) => map(value),
         Err() => or,
       };
 
   /// Maps the value in the [Result] if it is [isOk], otherwise returns the value returned by the provided [orElse] function.
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
-  R2 mapOrElse<R2>(
-    R2 Function(R) fn,
-    R2 Function(E) orElse,
-  ) =>
+  R2 mapOrElse<R2>({
+    required R2 Function(R) map,
+    required R2 Function(E) orElse,
+  }) =>
       switch (this) {
-        Ok(:final value) => fn(value),
+        Ok(:final value) => map(value),
         Err(:final error) => orElse(error),
       };
 

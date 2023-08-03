@@ -858,25 +858,25 @@ void main() {
     test('Test mapOr on Ok', () {
       const x = Result<int, String>.ok(1);
 
-      expect(x.mapOr((x) => x + 1, 5)).toEqual(2);
+      expect(x.mapOr(map: (x) => x + 1, or: 5)).toEqual(2);
     });
 
     test('Test mapOr on Err', () {
       const x = Result<int, String>.err('Error');
 
-      expect(x.mapOr((x) => x + 1, 5)).toEqual(5);
+      expect(x.mapOr(map: (x) => x + 1, or: 5)).toEqual(5);
     });
 
     test('Test mapOrElse on Ok', () {
       const x = Result<int, String>.ok(1);
 
-      expect(x.mapOrElse((x) => x + 1, (_) => 5)).toEqual(2);
+      expect(x.mapOrElse(map: (x) => x + 1, orElse: (_) => 5)).toEqual(2);
     });
 
     test('Test mapOrElse on Err', () {
       const x = Result<int, String>.err('Error');
 
-      expect(x.mapOrElse((x) => x + 1, (_) => 5)).toEqual(5);
+      expect(x.mapOrElse(map: (x) => x + 1, orElse: (_) => 5)).toEqual(5);
     });
 
     test('Test mapErr on Ok', () {
