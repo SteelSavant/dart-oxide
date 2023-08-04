@@ -25,7 +25,7 @@ abstract interface class IDisposable implements IAsyncDisposable {
 
 () _unitFn(void _) => ();
 
-@freezed
+@Freezed(copyWith: false)
 class _BoxFinalizable<T> with _$_BoxFinalizable<T> {
   const _BoxFinalizable._();
 

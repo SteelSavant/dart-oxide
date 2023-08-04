@@ -77,7 +77,7 @@ part 'option.freezed.dart';
 /// * [transpose] transposes an [Option] of a [Result] into a [Result] of an [Option].
 ///
 /// TODO::finish method overview
-@freezed
+@Freezed(copyWith: false)
 sealed class Option<T> with _$Option<T> {
   const Option._();
 

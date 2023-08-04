@@ -3,6 +3,5 @@ targets:
     builders:
       freezed:
         options:
-          copy_with: false
           map: false 
           when: false

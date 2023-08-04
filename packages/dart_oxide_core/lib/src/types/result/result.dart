@@ -6,7 +6,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'result.freezed.dart';
 
-@freezed
+@Freezed(copyWith: false)
 sealed class Result<R, E> with _$Result<R, E> {
   const Result._();
 

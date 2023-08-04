@@ -75,6 +75,118 @@ mixin _$_CountedBoxFinalizable<T> {
   Ptr<int> get count => throw _privateConstructorUsedError;
   bool get isFinalized => throw _privateConstructorUsedError;
   set isFinalized(bool value) => throw _privateConstructorUsedError;
+
+  @JsonKey(ignore: true)
+  _$CountedBoxFinalizableCopyWith<T, _CountedBoxFinalizable<T>> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class _$CountedBoxFinalizableCopyWith<T, $Res> {
+  factory _$CountedBoxFinalizableCopyWith(_CountedBoxFinalizable<T> value,
+          $Res Function(_CountedBoxFinalizable<T>) then) =
+      __$CountedBoxFinalizableCopyWithImpl<T, $Res, _CountedBoxFinalizable<T>>;
+  @useResult
+  $Res call(
+      {@freezed T value,
+      @freezed void Function(T) onFinalize,
+      @freezed Ptr<int> count,
+      bool isFinalized});
+}
+
+/// @nodoc
+class __$CountedBoxFinalizableCopyWithImpl<T, $Res,
+        $Val extends _CountedBoxFinalizable<T>>
+    implements _$CountedBoxFinalizableCopyWith<T, $Res> {
+  __$CountedBoxFinalizableCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? value = freezed,
+    Object? onFinalize = null,
+    Object? count = null,
+    Object? isFinalized = null,
+  }) {
+    return _then(_value.copyWith(
+      value: freezed == value
+          ? _value.value
+          : value // ignore: cast_nullable_to_non_nullable
+              as T,
+      onFinalize: null == onFinalize
+          ? _value.onFinalize
+          : onFinalize // ignore: cast_nullable_to_non_nullable
+              as void Function(T),
+      count: null == count
+          ? _value.count
+          : count // ignore: cast_nullable_to_non_nullable
+              as Ptr<int>,
+      isFinalized: null == isFinalized
+          ? _value.isFinalized
+          : isFinalized // ignore: cast_nullable_to_non_nullable
+              as bool,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$_CountedBoxFinalizableImplCopyWith<T, $Res>
+    implements _$CountedBoxFinalizableCopyWith<T, $Res> {
+  factory _$$_CountedBoxFinalizableImplCopyWith(
+          _$_CountedBoxFinalizableImpl<T> value,
+          $Res Function(_$_CountedBoxFinalizableImpl<T>) then) =
+      __$$_CountedBoxFinalizableImplCopyWithImpl<T, $Res>;
+  @override
+  @useResult
+  $Res call(
+      {@freezed T value,
+      @freezed void Function(T) onFinalize,
+      @freezed Ptr<int> count,
+      bool isFinalized});
+}
+
+/// @nodoc
+class __$$_CountedBoxFinalizableImplCopyWithImpl<T, $Res>
+    extends __$CountedBoxFinalizableCopyWithImpl<T, $Res,
+        _$_CountedBoxFinalizableImpl<T>>
+    implements _$$_CountedBoxFinalizableImplCopyWith<T, $Res> {
+  __$$_CountedBoxFinalizableImplCopyWithImpl(
+      _$_CountedBoxFinalizableImpl<T> _value,
+      $Res Function(_$_CountedBoxFinalizableImpl<T>) _then)
+      : super(_value, _then);
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? value = freezed,
+    Object? onFinalize = null,
+    Object? count = null,
+    Object? isFinalized = null,
+  }) {
+    return _then(_$_CountedBoxFinalizableImpl<T>(
+      value: freezed == value
+          ? _value.value
+          : value // ignore: cast_nullable_to_non_nullable
+              as T,
+      onFinalize: null == onFinalize
+          ? _value.onFinalize
+          : onFinalize // ignore: cast_nullable_to_non_nullable
+              as void Function(T),
+      count: null == count
+          ? _value.count
+          : count // ignore: cast_nullable_to_non_nullable
+              as Ptr<int>,
+      isFinalized: null == isFinalized
+          ? _value.isFinalized
+          : isFinalized // ignore: cast_nullable_to_non_nullable
+              as bool,
+    ));
+  }
 }
 
 /// @nodoc
@@ -103,6 +215,13 @@ class _$_CountedBoxFinalizableImpl<T> extends _CountedBoxFinalizableImpl<T> {
   String toString() {
     return '_CountedBoxFinalizable<$T>(value: $value, onFinalize: $onFinalize, count: $count, isFinalized: $isFinalized)';
   }
+
+  @JsonKey(ignore: true)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$_CountedBoxFinalizableImplCopyWith<T, _$_CountedBoxFinalizableImpl<T>>
+      get copyWith => __$$_CountedBoxFinalizableImplCopyWithImpl<T,
+          _$_CountedBoxFinalizableImpl<T>>(this, _$identity);
 }
 
 abstract class _CountedBoxFinalizableImpl<T> extends _CountedBoxFinalizable<T> {
@@ -127,4 +246,8 @@ abstract class _CountedBoxFinalizableImpl<T> extends _CountedBoxFinalizable<T> {
   @override
   bool get isFinalized;
   set isFinalized(bool value);
+  @override
+  @JsonKey(ignore: true)
+  _$$_CountedBoxFinalizableImplCopyWith<T, _$_CountedBoxFinalizableImpl<T>>
+      get copyWith => throw _privateConstructorUsedError;
 }
