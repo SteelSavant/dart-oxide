@@ -35,24 +35,24 @@ extension IDisposableExt<T extends IDisposable> on T {
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   @useResult
-  Box<T, ()> toBox() => Box.fromDisposable(this);
+  Box<T> toBox() => Box.fromDisposable(this);
 
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   @useResult
-  Rc<T, ()> toRc() => Rc.fromDisposable(this);
+  Rc<T> toRc() => Rc.fromDisposable(this);
 }
 
 extension IAsyncDisposableExt<T extends IAsyncDisposable> on T {
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   @useResult
-  Box<T, FutureOr<()>> toBox() => Box.fromAsyncDisposable(this);
+  AsyncBox<T, FutureOr<()>> toBox() => Box.fromAsyncDisposable(this);
 
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   @useResult
-  Rc<T, FutureOr<()>> toRc() => Rc.fromAsyncDisposable(this);
+  AsyncRc<T, FutureOr<()>> toRc() => Rc.fromAsyncDisposable(this);
 }
 
 extension OptionPtrExt<T> on Ptr<Option<T>> {

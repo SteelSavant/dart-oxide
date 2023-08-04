@@ -97,7 +97,7 @@ void main() {
         Box.fromAsyncDisposable(_SyncDisposable()),
       ];
 
-      expect(disposables).isA<List<Box<_SyncDisposable, FutureOr<()>>>>();
+      expect(disposables).isA<List<AsyncBox<_SyncDisposable, FutureOr<()>>>>();
     });
 
     test('Test expect to not throw if not disposed', () {
@@ -189,14 +189,14 @@ void main() {
     test('Test Ptr toBox', () {
       final box = Ptr(1).toBox();
 
-      expect(box).isA<Box<int, ()>>();
+      expect(box).isA<Box<int>>();
       expect(box.unwrap()).toEqual(1);
     });
 
     test('Test Ptr toRc', () {
       final rc = Ptr(1).toRc();
 
-      expect(rc).isA<Rc<int, ()>>();
+      expect(rc).isA<Rc<int>>();
       expect(rc.unwrap()).toEqual(1);
     });
 
@@ -278,6 +278,15 @@ void main() {
 
       expect(value).toEqual(1);
       expect(ptr.value).toEqual(null);
+    });
+  });
+
+  group('Test using statements', () {
+    test('Test using', () {
+      final box = Box.value(Ptr(1));
+      using(box, (box) {
+        box.unwrap().value = 2;
+      });
     });
   });
 }
