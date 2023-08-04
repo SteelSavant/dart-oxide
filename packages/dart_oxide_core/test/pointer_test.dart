@@ -283,10 +283,28 @@ void main() {
 
   group('Test using statements', () {
     test('Test using', () {
-      final box = Box.value(Ptr(1));
+      final ptr = Ptr(1);
+      final box = Box.value(ptr);
       using(box, (box) {
         box.unwrap().value = 2;
       });
+
+      expect(ptr.value).toEqual(2);
+      expect(box.unwrap).throws.isStateError();
+    });
+
+    test('Test usingAsync', () async {
+      final ptr = Ptr(1);
+      final box = Box.async(
+        ptr,
+        onDispose: (p0) => Future.value(()),
+      );
+      await usingAsync(box, (box) async {
+        box.unwrap().value = 2;
+      });
+
+      expect(ptr.value).toEqual(2);
+      expect(box.unwrap).throws.isStateError();
     });
   });
 }

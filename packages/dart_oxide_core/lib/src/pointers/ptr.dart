@@ -166,7 +166,7 @@ final class AsyncBox<T, U extends FutureOr<()>> extends BaseBox<T, U> {
 final class Box<T> extends AsyncBox<T, ()> implements IDisposable {
   Box(super.value, {required super.onDispose, super.finalize}) : super._();
 
-  AsyncBox<T, U> async<U extends FutureOr<()>>(
+  static AsyncBox<T, U> async<T, U extends FutureOr<()>>(
     T value, {
     required U Function(T) onDispose,
     bool finalize = true,
@@ -318,9 +318,12 @@ final class Rc<T> extends AsyncRc<T, ()> implements IDisposable {
         finalize: false,
       );
 
-  Rc._cloned(super.value, super.count,
-      {required super.onDispose, super.finalize})
-      : super._cloned();
+  Rc._cloned(
+    super.value,
+    super.count, {
+    required super.onDispose,
+    super.finalize,
+  }) : super._cloned();
 
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
