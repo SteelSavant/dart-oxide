@@ -47,9 +47,9 @@ void main() {
     });
 
     test('Test wrapped value is correct', () {
-      final disposable = Box.value(5);
+      final disposable = Box.fromValue(5);
 
-      expect(disposable.wrapped).toEqual(const Result.ok(5));
+      expect(disposable.checked).toEqual(const Result.ok(5));
     });
 
     test('Test sync dispose function actually invoked', () {
@@ -186,20 +186,6 @@ void main() {
   });
 
   group('Ptr tests', () {
-    test('Test Ptr toBox', () {
-      final box = Ptr(1).toBox();
-
-      expect(box).isA<Box<int, ()>>();
-      expect(box.unwrap()).toEqual(1);
-    });
-
-    test('Test Ptr toRc', () {
-      final rc = Ptr(1).toRc();
-
-      expect(rc).isA<Rc<int, ()>>();
-      expect(rc.unwrap()).toEqual(1);
-    });
-
     test('Test OptionPtr take from Some', () {
       final ptr = Ptr(const Option.some(1));
       final option = ptr.take();
@@ -284,7 +270,7 @@ void main() {
   group('Test using statements', () {
     test('Test using', () {
       final ptr = Ptr(1);
-      final box = Box.value(ptr);
+      final box = Box.fromValue(ptr);
       using(box, (box) {
         box.unwrap().value = 2;
       });

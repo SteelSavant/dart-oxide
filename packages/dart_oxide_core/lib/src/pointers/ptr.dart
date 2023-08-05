@@ -59,7 +59,7 @@ class _CountedBoxFinalizable<T>
 /// Protects a value that needs to be disposed, and tracks whether or not it has been disposed.
 /// [()] is used instead of [void] to prevent collections from unifying to [void] instead of [FutureOr<void>].
 @internal
-abstract final class BaseBox<T, U extends FutureOr<()>>
+abstract final class BaseBox<T extends Object, U extends FutureOr<()>>
     implements IAsyncDisposable<U> {
   static final Finalizer<_BoxFinalizable<dynamic>> _finalizer =
       Finalizer((value) => value.finalize());
@@ -99,6 +99,12 @@ abstract final class BaseBox<T, U extends FutureOr<()>>
   @pragma('dart2js:tryInline')
   @useResult
   @doNotStore
+  T? get value => _value;
+
+  @pragma('vm:prefer-inline')
+  @pragma('dart2js:tryInline')
+  @useResult
+  @doNotStore
   T unwrap() => _value ??= throw StateError(_errorMsg);
 
   @pragma('vm:prefer-inline')
@@ -123,12 +129,24 @@ abstract final class BaseBox<T, U extends FutureOr<()>>
         (false, false) => throw StateError(error),
       };
 
-  /// Returns a result containing the return value of the provided function if the object, or a [StateError] if the object is disposed.
+  /// Returns a [Result] containing the protected object, or a [StateError] if the object is disposed.
+  ///
+  /// # Examples
+  ///
+  /// ```
+  /// final box = Box(1);
+  /// final result = box.checked;
+  /// assert(result.isOk);
+  ///
+  /// box.dispose();
+  /// final result2 = box.checked;
+  /// assert(result2.isErr);
+  /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   @useResult
   @doNotStore
-  Result<T, StateError> get wrapped {
+  Result<T, StateError> get checked {
     final value = this._value;
     return value != null ? Result.ok(value) : Result.err(StateError(_errorMsg));
   }
@@ -144,25 +162,58 @@ abstract final class BaseBox<T, U extends FutureOr<()>>
     return value;
   }
 
-  /// Disposes the protected object, preventing further use.
+  /// Disposes this box the protected object, preventing further use.
+  ///
+  /// # Throws
+  ///
+  /// Throws a [StateError] if the object has already been disposed.
+  ///
+  /// # Examples
+  ///
+  /// ```
+  /// final box = Box(1);
+  /// box.dispose();
+  /// box.unwrap(); // throws StateError
+  /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   @override
   U dispose() => _drop(_dispose());
 }
 
-final class Box<T, U extends FutureOr<()>> extends BaseBox<T, U> {
+final class Box<T extends Object, U extends FutureOr<()>>
+    extends BaseBox<T, U> {
+  /// Creates a new [Box] that points to the provided value. When this box is disposed,
+  /// [onDispose] will be called on [value]. If [finalize]is [true], this [Box]
+  /// will be attached to a finalizer, which will dispose this [Box] when it becomes unreachable.
+  ///
+  /// Due to the nature of [Finalizer], [onDispose] is not guaranteed to be invoked.
   Box(super.value, {required super.onDispose, super.finalize}) : super();
 
+  /// Creates a new [Box] that points to the provided value. The value will
+  /// not be disposed when this [Box] is disposed. Primarily useful
+  /// for storing a value in a collection of [Box]s, or for tracking the
+  /// lifetime/usage of a value at runtime.
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   @useResult
-  static Box<T, ()> value<T>(T value) => Box(
+  static Box<T, ()> fromValue<T extends Object>(T value) => Box(
         value,
         onDispose: _unitFn,
         finalize: false,
       );
 
+  /// Creates a new [Box] that points to the provided value. The [IDisposable]
+  /// will be disposed when this [Box] is disposed. If [finalize] is [true],
+  /// this [Box] will be attached to a finalizer, which will dispose [value]
+  /// when this [Box] becomes unreachable.
+  ///
+  /// Due to the nature of [Finalizer], [IDisposable.dispose] is not guaranteed to be invoked.
+  ///
+  /// # Undefined Behavior
+  ///
+  /// Disposing [value] from outside of this [Box] is undefined behavior, and
+  /// may result in a double free, or cause arbitrary methods to throw.
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   @useResult
@@ -176,6 +227,17 @@ final class Box<T, U extends FutureOr<()>> extends BaseBox<T, U> {
         finalize: finalize,
       );
 
+  /// Creates a new [Box] that points to the provided value. The [IAsyncDisposable]
+  /// will be disposed when this [Box] is disposed. If [finalize] is [true],
+  /// this [Box] will be attached to a finalizer, which will dispose [value]
+  /// when this [Box] becomes unreachable.
+  ///
+  /// Due to the nature of [Finalizer], [IAsyncDisposable.dispose] is not guaranteed to be invoked.
+  ///
+  /// # Undefined Behavior
+  ///
+  /// Disposing [value] from outside of this [Box] is undefined behavior, and
+  /// may result in a double free, or cause arbitrary methods to throw.
   static Box<T, U> fromAsyncDisposable<T extends IAsyncDisposable<U>,
           U extends FutureOr<()>>(
     T value, {
@@ -194,15 +256,35 @@ final class Box<T, U extends FutureOr<()>> extends BaseBox<T, U> {
       );
 }
 
-final class Rc<T, U extends FutureOr<()>> extends BaseBox<T, U>
+/// A reference counted pointer. When the last reference is dropped, the
+/// underlying value is disposed. [()] is used instead of [void] to prevent
+/// the return type from unifying to [void] instead of [FutureOr<void>].
+final class Rc<T extends Object, U extends FutureOr<()>> extends BaseBox<T, U>
     implements IAsyncDisposable<U> {
   Ptr<int> _count = Ptr(1);
   final bool _finalize;
 
+  /// Creates a new [Rc] that points to the provided value. When all references
+  /// to the value are dropped, [onDispose] will be called on [value]. If [finalize]
+  /// is [true], this [Rc] will be attached to a finalizer, which will dispose
+  /// this [Rc] when it becomes unreachable.
+  ///
+  /// Due to the nature of [Finalizer], [onDispose] is not guaranteed to be invoked.
   Rc(super.value, {required super.onDispose, super.finalize})
       : _finalize = finalize,
         super();
 
+  /// Creates a new [Rc] that points to the provided value. The [IDisposable]
+  /// will be disposed when the last reference is disposed. If [finalize] is
+  /// [true], this [Rc] will be attached to a finalizer, which will dispose
+  /// this [Rc] when it becomes unreachable.
+  ///
+  /// Due to the nature of [Finalizer], [IDisposable.dispose] is not guaranteed to be invoked.
+  ///
+  /// # Undefined Behavior
+  ///
+  /// Disposing [value] from outside of this [Rc] is undefined behavior, and
+  /// may result in a double free, or cause arbitrary methods to throw.
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   @useResult
@@ -216,6 +298,17 @@ final class Rc<T, U extends FutureOr<()>> extends BaseBox<T, U>
         finalize: finalize,
       );
 
+  /// Creates a new [Rc] that points to the provided value. The [IAsyncDisposable]
+  /// will be disposed when the last reference is disposed. If [finalize] is
+  /// [true], this [Rc] will be attached to a finalizer, which will dispose
+  /// this [Rc] when it becomes unreachable.
+  ///
+  /// Due to the nature of [Finalizer], [IAsyncDisposable.dispose] is not guaranteed to be invoked.
+  ///
+  /// # Undefined Behavior
+  ///
+  /// Disposing [value] from outside of this [Rc] is undefined behavior, and
+  /// may result in a double free, or cause arbitrary methods to throw.
   static Rc<T, U> fromAsyncDisposable<T extends IAsyncDisposable<U>,
           U extends FutureOr<()>>(
     T value, {
@@ -227,10 +320,14 @@ final class Rc<T, U extends FutureOr<()>> extends BaseBox<T, U>
         finalize: finalize,
       );
 
+  /// Creates a new [Rc] that points to the provided value. The value will
+  /// not be disposed when the last reference is dropped. Primarily useful
+  /// for storing a value in a collection of [Rc]s, or for tracking the
+  /// lifetime/usage of a value at runtime.
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   @useResult
-  static Rc<T, ()> value<T>(T value) => Rc(
+  static Rc<T, ()> fromValue<T extends Object>(T value) => Rc(
         value,
         onDispose: _unitFn,
         finalize: false,
@@ -252,6 +349,21 @@ final class Rc<T, U extends FutureOr<()>> extends BaseBox<T, U>
         isFinalized: false,
       );
 
+  /// Returns a new [Rc] that points to the same value as [this], and increments
+  /// the reference count.
+  ///
+  /// # Throws
+  ///
+  /// Throws a [StateError] if [this] is already disposed.
+  ///
+  /// # Examples
+  ///
+  /// ```
+  /// final rc = Rc(1);
+  /// final rc2 = rc.clone();
+  ///
+  /// assert(rc.unwrap() == rc2.unwrap());
+  /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   @useResult
@@ -267,13 +379,28 @@ final class Rc<T, U extends FutureOr<()>> extends BaseBox<T, U>
     );
   }
 
+  /// Disposes this [Rc] and decrements the reference count. If this is the last reference to [value], [value] is also disposed.
+  ///
+  /// # Throws
+  ///
+  /// Throws a [StateError] if [this] is already disposed.
+  ///
+  /// # Examples
+  ///
+  /// ```
+  /// final IDisposable x = ...; // some disposable object
+  /// final rc = Rc(x);
+  /// rc.dispose();
+  /// rc.unwrap(); // throws StateError
+  /// x.unwrap(); // throws StateError
+  /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   @override
   U dispose() {
-    _count.value--;
-
     final value = _dispose();
+
+    _count.value--;
 
     if (_count.value == 0) {
       return _drop(value);
@@ -288,18 +415,28 @@ final class Rc<T, U extends FutureOr<()>> extends BaseBox<T, U>
   }
 }
 
+/// A pointer to a value. A mutable wrapper around a value to allow the internal
+/// value to be changed without changing the pointer itself. Most useful for
+/// modifying external values in closures/functions.
+///
+/// Mutating state (especially at a distance, as is possible through [Ptr])
+/// is generally discouraged, as it can lead to difficult to debug code.
+/// Use with caution.
+///
+/// # Examples
+///
+/// ```
+/// void increment(Ptr<int> ptr) {
+///   ptr.value +=1 ;
+/// }
+///
+/// final x = Ptr(1);
+/// increment(x);
+///
+/// assert(x.value == 2);
+/// ```
 class Ptr<T> {
   T value;
 
   Ptr(this.value);
-
-  @pragma('vm:prefer-inline')
-  @pragma('dart2js:tryInline')
-  @useResult
-  Box<T, ()> toBox() => Box.value(value);
-
-  @pragma('vm:prefer-inline')
-  @pragma('dart2js:tryInline')
-  @useResult
-  Rc<T, ()> toRc() => Rc.value(value);
 }
