@@ -19,6 +19,7 @@ mixin _$Option<T> {}
 
 /// @nodoc
 
+@literal
 class _$Some<T> extends Some<T> {
   const _$Some(this.value) : super._();
 
@@ -52,6 +53,7 @@ abstract class Some<T> extends Option<T> {
 
 /// @nodoc
 
+@literal
 class _$None<T> extends None<T> {
   const _$None() : super._();
 

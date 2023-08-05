@@ -7,7 +7,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 /// Runs the given [action] with the given [resource] and then disposes it.
 /// The [action] must be synchronous.
-R using<T extends IDisposable, R>(
+R using<T extends IAsyncDisposable<()>, R>(
   T resource,
   R Function(T) action,
 ) {
@@ -20,14 +20,15 @@ R using<T extends IDisposable, R>(
 
 /// Runs the given [action] with the given [resource] and then disposes it.
 /// Any of the [action] or the [resource] may be asynchronous.
-Future<R> usingAsync<T extends IAsyncDisposable, R>(
+Future<R> usingAsync<T extends IAsyncDisposable<U>, U extends FutureOr<()>, R>(
   T resource,
   FutureOr<R> Function(T) action,
 ) async {
   try {
     return await action(resource);
   } finally {
-    await resource.dispose();
+    // ignore: unnecessary_cast, cast is necessary to satisfy the type checker
+    await (resource as IAsyncDisposable<FutureOr<()>>).dispose();
   }
 }
 
@@ -35,24 +36,25 @@ extension IDisposableExt<T extends IDisposable> on T {
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   @useResult
-  Box<T> toBox() => Box.fromDisposable(this);
+  Box<T, ()> toBox() => Box.fromDisposable<T>(this);
 
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   @useResult
-  Rc<T> toRc() => Rc.fromDisposable(this);
+  Rc<T, ()> toRc() => Rc.fromDisposable<T>(this);
 }
 
-extension IAsyncDisposableExt<T extends IAsyncDisposable> on T {
+extension IDisposableAsyncExt<T extends IAsyncDisposable<U>,
+    U extends FutureOr<()>> on T {
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   @useResult
-  AsyncBox<T, FutureOr<()>> toBox() => Box.fromAsyncDisposable(this);
+  Box<T, U> toBox() => Box.fromAsyncDisposable<T, U>(this);
 
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   @useResult
-  AsyncRc<T, FutureOr<()>> toRc() => Rc.fromAsyncDisposable(this);
+  Rc<T, U> toRc() => Rc.fromAsyncDisposable<T, U>(this);
 }
 
 extension OptionPtrExt<T> on Ptr<Option<T>> {

@@ -92,6 +92,7 @@ sealed class Option<T> with _$Option<T> {
   ///
   /// assert(x == y);
   /// ```
+  @literal
   const factory Option.some(T value) = Some<T>;
 
   /// Creates an [Option] that does not contain a value.
@@ -105,6 +106,7 @@ sealed class Option<T> with _$Option<T> {
   ///
   /// assert(x == y);
   /// ```
+  @literal
   const factory Option.none() = None<T>;
 
   /// If the option is [Some], returns the contained value, otherwise returns null.
@@ -574,6 +576,7 @@ sealed class Option<T> with _$Option<T> {
   Option<(T, R)> zip<R>(Option<R> other) => switch (this) {
         Some(:final value) => other.map((other) => (value, other)),
         // ignore: prefer_const_constructors, fails to compile if const
+        // ignore: non_const_call_to_literal_constructor, fails to compile if const
         None() => Option<(T, R)>.none(),
       };
 

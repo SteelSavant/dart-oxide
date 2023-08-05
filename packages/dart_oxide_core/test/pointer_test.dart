@@ -15,7 +15,7 @@ class _SyncDisposable implements IDisposable {
   () dispose() => (x = 5).toUnit();
 }
 
-class _AsyncDisposable implements IAsyncDisposable {
+class _AsyncDisposable implements IAsyncDisposable<Future<()>> {
   int x = 1;
 
   _AsyncDisposable();
@@ -97,7 +97,7 @@ void main() {
         Box.fromAsyncDisposable(_SyncDisposable()),
       ];
 
-      expect(disposables).isA<List<AsyncBox<_SyncDisposable, FutureOr<()>>>>();
+      expect(disposables).isA<List<Box<_SyncDisposable, FutureOr<()>>>>();
     });
 
     test('Test expect to not throw if not disposed', () {
@@ -189,14 +189,14 @@ void main() {
     test('Test Ptr toBox', () {
       final box = Ptr(1).toBox();
 
-      expect(box).isA<Box<int>>();
+      expect(box).isA<Box<int, ()>>();
       expect(box.unwrap()).toEqual(1);
     });
 
     test('Test Ptr toRc', () {
       final rc = Ptr(1).toRc();
 
-      expect(rc).isA<Rc<int>>();
+      expect(rc).isA<Rc<int, ()>>();
       expect(rc.unwrap()).toEqual(1);
     });
 
@@ -295,7 +295,7 @@ void main() {
 
     test('Test usingAsync', () async {
       final ptr = Ptr(1);
-      final box = Box.async(
+      final box = Box(
         ptr,
         onDispose: (p0) => Future.value(()),
       );
