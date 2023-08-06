@@ -8,15 +8,25 @@ part 'ptr.freezed.dart';
 
 () _unitFn(void _) => ();
 
-/// An interface for defining a class that can be disposed. Accessing an [IDisposable] after calling [dispose], including calling [dispose] again, is undefined behavior.
+/// An interface for defining a class that can be disposed, (possibly) asynchronously.
+///
+/// # Undefined Behavior
+///
+/// Accessing an [IDisposable] after calling [dispose], including calling [dispose]
+/// again, is undefined behavior.
 abstract interface class IAsyncDisposable<U extends FutureOr<()>> {
   /// Disposes the object, preventing further use.
-  /// Return type is FutureOr<()> to allow unification with [IDisposable]; always treat it as a future.
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   U dispose();
 }
 
+/// An interface for defining a class that can be disposed synchronously.
+///
+/// # Undefined Behavior
+///
+/// Accessing an [IDisposable] after calling [dispose], including calling [dispose]
+/// again, is undefined behavior.
 typedef IDisposable = IAsyncDisposable<()>;
 
 @Freezed(copyWith: false)
@@ -56,7 +66,10 @@ class _CountedBoxFinalizable<T>
   }
 }
 
-/// Protects a value that needs to be disposed, and tracks whether or not it has been disposed.
+/// Base implementation for (relatively) smart pointers. Provides a common
+/// interface for accessing the protected object, and disposing the object,
+/// as well as a common implementation for attaching a finalizer.
+///
 /// [()] is used instead of [void] to prevent collections from unifying to [void] instead of [FutureOr<void>].
 @internal
 abstract final class BaseBox<T extends Object, U extends FutureOr<()>>
@@ -95,61 +108,88 @@ abstract final class BaseBox<T extends Object, U extends FutureOr<()>>
   String get _errorMsg =>
       'cannot use object after being disposed: $T first disposed at $_disposedTime from $_disposedTrace';
 
-  @pragma('vm:prefer-inline')
-  @pragma('dart2js:tryInline')
-  @useResult
-  @doNotStore
-  T? get value => _value;
-
-  @pragma('vm:prefer-inline')
-  @pragma('dart2js:tryInline')
-  @useResult
-  @doNotStore
-  T unwrap() => _value ??= throw StateError(_errorMsg);
-
-  @pragma('vm:prefer-inline')
-  @pragma('dart2js:tryInline')
-  @useResult
-  @doNotStore
-  T expect(
-    String error, {
-    bool includeTrace = false,
-    bool includeDisposeTime = false,
-  }) =>
-      _value ??= switch ((includeTrace, includeDisposeTime)) {
-        (true, true) => throw StateError(
-            '$error: $_errorMsg',
-          ),
-        (true, false) => throw StateError(
-            '$error: $T first disposed from $_disposedTrace',
-          ),
-        (false, true) => throw StateError(
-            '$error: $T first disposed at $_disposedTime',
-          ),
-        (false, false) => throw StateError(error),
-      };
-
   /// Returns a [Result] containing the protected object, or a [StateError] if the object is disposed.
   ///
   /// # Examples
   ///
   /// ```
   /// final box = Box(1);
-  /// final result = box.checked;
+  /// final result = box.value;
   /// assert(result.isOk);
   ///
   /// box.dispose();
-  /// final result2 = box.checked;
+  /// final result2 = box.value;
   /// assert(result2.isErr);
   /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   @useResult
   @doNotStore
-  Result<T, StateError> get checked {
+  Result<T, StateError> get value {
     final value = this._value;
     return value != null ? Result.ok(value) : Result.err(StateError(_errorMsg));
   }
+
+  /// Returns the protected object, or throws a [StateError] if the object is disposed.
+  ///
+  /// # Throws
+  ///
+  /// Throws a [StateError] if the object is disposed.
+  ///
+  /// # Examples
+  ///
+  /// ```
+  /// final box = Box(1);
+  /// assert(box.unwrap() == 1);
+  ///
+  /// box.dispose();
+  /// box.unwrap(); // throws StateError
+  /// ```
+  @pragma('vm:prefer-inline')
+  @pragma('dart2js:tryInline')
+  @useResult
+  @doNotStore
+  T unwrap() => _value ??= throw StateError(_errorMsg);
+
+  /// Returns the protected object, or throws a [StateError] with the provided
+  /// [msg]. If [includeTrace] is [true], the stack trace of the first call to
+  /// [dispose] will be included in the error message. If [includeDisposeTime]
+  /// is [true], the time of the first call to [dispose] will be included in
+  /// the error message.
+  ///
+  /// # Throws
+  ///
+  /// Throws a [StateError] if the object has already been disposed.
+  ///
+  /// # Examples
+  ///
+  /// ```
+  /// final box = Box(1);
+  /// assert(box.expect('box is not disposed') == 1);
+  /// box.dispose();
+  /// box.expect('box is not disposed'); // throws StateError
+  /// ```
+  @pragma('vm:prefer-inline')
+  @pragma('dart2js:tryInline')
+  @useResult
+  @doNotStore
+  T expect(
+    String msg, {
+    bool includeTrace = false,
+    bool includeDisposeTime = false,
+  }) =>
+      _value ??= switch ((includeTrace, includeDisposeTime)) {
+        (true, true) => throw StateError(
+            '$msg: $_errorMsg',
+          ),
+        (true, false) => throw StateError(
+            '$msg: $T first disposed from $_disposedTrace',
+          ),
+        (false, true) => throw StateError(
+            '$msg: $T first disposed at $_disposedTime',
+          ),
+        (false, false) => throw StateError(msg),
+      };
 
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
@@ -181,6 +221,7 @@ abstract final class BaseBox<T extends Object, U extends FutureOr<()>>
   U dispose() => _drop(_dispose());
 }
 
+/// Protects a value that needs to be disposed, and tracks whether or not it has been disposed.
 final class Box<T extends Object, U extends FutureOr<()>>
     extends BaseBox<T, U> {
   /// Creates a new [Box] that points to the provided value. When this box is disposed,

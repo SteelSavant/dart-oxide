@@ -7,6 +7,21 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 /// Runs the given [action] with the given [resource] and then disposes it.
 /// The [action] must be synchronous.
+///
+/// # Throws
+///
+/// Throws if the [action] throws.
+///
+/// # Examples
+///
+/// ```dart
+/// final x = 1;
+/// final y = using(
+///   Box.fromValue(2),
+///   (box) => x + box.value,
+/// );
+/// assert(y == 3);
+/// ```
 R using<T extends IAsyncDisposable<()>, R>(
   T resource,
   R Function(T) action,
@@ -20,6 +35,21 @@ R using<T extends IAsyncDisposable<()>, R>(
 
 /// Runs the given [action] with the given [resource] and then disposes it.
 /// Any of the [action] or the [resource] may be asynchronous.
+///
+/// # Throws
+///
+/// Throws if the [action] throws.
+///
+/// # Examples
+///
+/// ```dart
+/// final x = 1;
+/// final y = await usingAsync(
+///   Box.fromValue(2),
+///   (box) async => x + box.value,
+/// );
+/// assert(y == 3);
+/// ```
 Future<R> usingAsync<T extends IAsyncDisposable<U>, U extends FutureOr<()>, R>(
   T resource,
   FutureOr<R> Function(T) action,
@@ -33,11 +63,13 @@ Future<R> usingAsync<T extends IAsyncDisposable<U>, U extends FutureOr<()>, R>(
 }
 
 extension IDisposableExt<T extends IDisposable> on T {
+  /// Returns a [Box] that wraps this [IDisposable].
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   @useResult
   Box<T, ()> toBox() => Box.fromDisposable<T>(this);
 
+  /// Returns a [Rc] that wraps this [IDisposable].
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   @useResult
@@ -46,11 +78,13 @@ extension IDisposableExt<T extends IDisposable> on T {
 
 extension IDisposableAsyncExt<T extends IAsyncDisposable<U>,
     U extends FutureOr<()>> on T {
+  /// Returns a [Box] that wraps this [IAsyncDisposable].
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   @useResult
   Box<T, U> toBox() => Box.fromAsyncDisposable<T, U>(this);
 
+  /// Returns a [Rc] that wraps this [IAsyncDisposable].
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   @useResult

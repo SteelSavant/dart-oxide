@@ -49,7 +49,7 @@ void main() {
     test('Test wrapped value is correct', () {
       final disposable = Box.fromValue(5);
 
-      expect(disposable.checked).toEqual(const Result.ok(5));
+      expect(disposable.value).toEqual(const Result.ok(5));
     });
 
     test('Test sync dispose function actually invoked', () {
