@@ -330,8 +330,6 @@ extension ResultFutureErr<R, E> on Result<R, Future<E>> {
       };
 }
 
-// unwrapOrDefault not currently possible generically; static extensions are used instead for known types
-
 extension ResultResult<R, E> on Result<Result<R, E>, E> {
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
@@ -341,8 +339,20 @@ extension ResultResult<R, E> on Result<Result<R, E>, E> {
       };
 }
 
+// unwrapOrDefault not currently possible generically; static extensions are used instead for known types
+
 extension ResultBool<E> on Result<bool, E> {
   /// Returns the value in the [Result] if it is [isOk], otherwise returns `false`.
+  ///
+  /// # Examples
+  ///
+  /// ```dart
+  /// final ok = Result<bool, Exception>.ok(true);
+  /// final err = Result<bool, Exception>.err(Exception());
+  ///
+  /// assert(ok.unwrapOrDefault() == true);
+  /// assert(err.unwrapOrDefault() == false);
+  /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   bool unwrapOrDefault() => unwrapOr(false);
@@ -350,6 +360,16 @@ extension ResultBool<E> on Result<bool, E> {
 
 extension ResultInt<E> on Result<int, E> {
   /// Returns the value in the [Result] if it is [isOk], otherwise returns `0`.
+  ///
+  /// # Examples
+  ///
+  /// ```dart
+  /// final ok = Result<int, Exception>.ok(1);
+  /// final err = Result<int, Exception>.err(Exception());
+  ///
+  /// assert(ok.unwrapOrDefault() == 1);
+  /// assert(err.unwrapOrDefault() == 0);
+  /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   int unwrapOrDefault() => unwrapOr(0);
@@ -357,6 +377,16 @@ extension ResultInt<E> on Result<int, E> {
 
 extension ResultDouble<E> on Result<double, E> {
   /// Returns the value in the [Result] if it is [isOk], otherwise returns `0.0`.
+  ///
+  /// # Examples
+  ///
+  /// ```dart
+  /// final ok = Result<double, Exception>.ok(1.0);
+  /// final err = Result<double, Exception>.err(Exception());
+  ///
+  /// assert(ok.unwrapOrDefault() == 1.0);
+  /// assert(err.unwrapOrDefault() == 0.0);
+  /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   double unwrapOrDefault() => unwrapOr(0.0);
@@ -364,6 +394,16 @@ extension ResultDouble<E> on Result<double, E> {
 
 extension ResultNum<E> on Result<num, E> {
   /// Returns the value in the [Result] if it is [isOk], otherwise returns `0`.
+  ///
+  /// # Examples
+  ///
+  /// ```dart
+  /// final ok = Result<num, Exception>.ok(1);
+  /// final err = Result<num, Exception>.err(Exception());
+  ///
+  /// assert(ok.unwrapOrDefault() == 1);
+  /// assert(err.unwrapOrDefault() == 0);
+  /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   num unwrapOrDefault() => unwrapOr(0);
@@ -371,6 +411,16 @@ extension ResultNum<E> on Result<num, E> {
 
 extension ResultString<E> on Result<String, E> {
   /// Returns the value in the [Result] if it is [isOk], otherwise returns `''`.
+  ///
+  /// # Examples
+  ///
+  /// ```dart
+  /// final ok = Result<String, Exception>.ok('hello');
+  /// final err = Result<String, Exception>.err(Exception());
+  ///
+  /// assert(ok.unwrapOrDefault(); == 'hello');
+  /// assert(err.unwrapOrDefault == '');
+  /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   String unwrapOrDefault() => unwrapOr('');
@@ -378,27 +428,67 @@ extension ResultString<E> on Result<String, E> {
 
 extension ResultDateTime<E> on Result<DateTime, E> {
   /// Returns the value in the [Result] if it is [isOk], otherwise returns `DateTime(0)`.
+  ///
+  /// # Examples
+  ///
+  /// ```dart
+  /// final ok = Result<DateTime, Exception>.ok(DateTime(1));
+  /// final err = Result<DateTime, Exception>.err(Exception());
+  ///
+  /// assert(ok.unwrapOrDefault() == DateTime(1));
+  /// assert(err.unwrapOrDefault() == DateTime(0));
+  /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   DateTime unwrapOrDefault() => unwrapOr(DateTime(0));
 }
 
 extension ResultList<T, E> on Result<List<T>, E> {
-  /// Returns the value in the [Result] if it is [isOk], otherwise returns `[]`.
+  /// Returns the value in the [Result] if it is [isOk], otherwise returns `<T>[]`.
+  ///
+  /// # Examples
+  ///
+  /// ```dart
+  /// final ok = Result<List<int>, Exception>.ok([1, 2, 3]);
+  /// final err = Result<List<int>, Exception>.err(Exception());
+  ///
+  /// assert(ok.unwrapOrDefault() == [1, 2, 3]);
+  /// assert(err.unwrapOrDefault() == []);
+  /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   List<T> unwrapOrDefault() => unwrapOr([]);
 }
 
 extension ResultMap<K, V, E> on Result<Map<K, V>, E> {
-  /// Returns the value in the [Result] if it is [isOk], otherwise returns `{}`.
+  /// Returns the value in the [Result] if it is [isOk], otherwise returns `<K,V>{}`.
+  ///
+  /// # Examples
+  ///
+  /// ```dart
+  /// final ok = Result<Map<int, int>, Exception>.ok({1: 1, 2: 2, 3: 3});
+  /// final err = Result<Map<int, int>, Exception>.err(Exception());
+  ///
+  /// assert(ok.unwrapOrDefault() == {1: 1, 2: 2, 3: 3});
+  /// assert(err.unwrapOrDefault() == {});
+  /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   Map<K, V> unwrapOrDefault() => unwrapOr({});
 }
 
 extension ResultSet<T, E> on Result<Set<T>, E> {
-  /// Returns the value in the [Result] if it is [isOk], otherwise returns `{}`.
+  /// Returns the value in the [Result] if it is [isOk], otherwise returns `<T>{}`.
+  ///
+  /// # Examples
+  ///
+  /// ```dart
+  /// final ok = Result<Set<int>, Exception>.ok({1, 2, 3});
+  /// final err = Result<Set<int>, Exception>.err(Exception());
+  ///
+  /// assert(ok.unwrapOrDefault() == {1, 2, 3});
+  /// assert(err.unwrapOrDefault() == {});
+  /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   Set<T> unwrapOrDefault() => unwrapOr({});
@@ -406,6 +496,16 @@ extension ResultSet<T, E> on Result<Set<T>, E> {
 
 extension ResultIterable<T, E> on Result<Iterable<T>, E> {
   /// Returns the value in the [Result] if it is [isOk], otherwise returns `[]`.
+  ///
+  /// # Examples
+  ///
+  /// ```dart
+  /// final ok = Result<Iterable<int>, Exception>.ok([1, 2, 3]);
+  /// final err = Result<Iterable<int>, Exception>.err(Exception());
+  ///
+  /// assert(ok.unwrapOrDefault().toList() == [1, 2, 3]);
+  /// assert(err.unwrapOrDefault().toList() == []);
+  /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   Iterable<T> unwrapOrDefault() => unwrapOr([]);
@@ -413,6 +513,16 @@ extension ResultIterable<T, E> on Result<Iterable<T>, E> {
 
 extension ResultStream<T, E> on Result<Stream<T>, E> {
   /// Returns the value in the [Result] if it is [isOk], otherwise returns `Stream.empty()`.
+  ///
+  /// # Examples
+  ///
+  /// ```dart
+  /// final ok = Result<Stream<int>, Exception>.ok(Stream.fromIterable([1, 2, 3]));
+  /// final err = Result<Stream<int>, Exception>.err(Exception());
+  ///
+  /// assert(await ok.unwrapOrDefault().toList() == [1, 2, 3]);
+  /// assert(await err.unwrapOrDefault().toList() == []);
+  /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   Stream<T> unwrapOrDefault() => unwrapOr(Stream<T>.empty());
@@ -420,6 +530,16 @@ extension ResultStream<T, E> on Result<Stream<T>, E> {
 
 extension ResultDuration<E> on Result<Duration, E> {
   /// Returns the value in the [Result] if it is [isOk], otherwise returns `Duration.zero`.
+  ///
+  /// # Examples
+  ///
+  /// ```
+  /// final ok = Result<Duration, Exception>.ok(const Duration(seconds: 1));
+  /// final err = Result<Duration, Exception>.err(Exception());
+  ///
+  /// assert(ok.unwrapOrDefault() == const Duration(seconds: 1));
+  /// assert(err.unwrapOrDefault() == Duration.zero);
+  /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   Duration unwrapOrDefault() => unwrapOr(Duration.zero);
