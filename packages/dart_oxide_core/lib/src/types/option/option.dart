@@ -423,12 +423,12 @@ sealed class Option<T> with _$Option<T> {
   /// # Examples
   ///
   /// ```
-  /// final x = Some(4);
-  /// assert(x.iter.moveNext() == true);
-  /// assert(x.iter.current == 4);
+  /// final xiter = Some(4).iter;
+  /// assert(iter.moveNext() == true);
+  /// assert(iter.current == 4);
   ///
-  /// final y = None<int>();
-  /// assert(y.iter.moveNext() == false);
+  /// final yiter = None<int>().iter;
+  /// assert(iter.moveNext() == false);
   /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
