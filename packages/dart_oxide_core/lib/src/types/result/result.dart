@@ -6,6 +6,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'result.freezed.dart';
 
+/// [Result] is a type that represents either success ([Ok]) or failure ([Err]).
 @Freezed(copyWith: false)
 sealed class Result<R, E> with _$Result<R, E> {
   const Result._();
@@ -84,16 +85,50 @@ sealed class Result<R, E> with _$Result<R, E> {
   //   }
   // }
 
-  /// Checks if the [Result] contains a value.
+  /// Returns [true] if the result is [Ok]
+  ///
+  /// # Examples
+  ///
+  /// ```dart
+  /// final ok = Result<int, String>.ok(1);
+  /// assert(ok.isOk == true);
+  ///
+  /// final err = Result<int, String>.err('error');
+  /// assert(err.isOk == false);
+  /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   bool get isOk => this is Ok<R, E>;
 
+  /// Returns [true] if the result is [Err]
+  ///
+  /// # Examples
+  ///
+  /// ```dart
+  /// final ok = Result<int, String>.ok(1);
+  /// assert(ok.isErr == false);
+  ///
+  /// final err = Result<int, String>.err('error');
+  /// assert(err.isErr == true);
+  /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   bool get isErr => this is Err<R, E>;
 
-  /// Checks if the [Result] contains a value that satisfies the given [predicate].
+  /// Returns [true] if the result is [Ok] and the value inside matches the given [predicate].
+  ///
+  /// # Examples
+  ///
+  /// ```dart
+  /// final okPass = Result<int, String>.ok(2);
+  /// assert(ok.isOkAnd((value) => value > 1) == true);
+  ///
+  /// final okFail = Result<int, String>.ok(1);
+  /// assert(ok.isOkAnd((value) => value > 1) == false);
+  ///
+  /// final err = Result<int, String>.err('error');
+  /// assert(err.isOkAnd((value) => value > 1) == false);
+  /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   bool isOkAnd(bool Function(R) predicate) => switch (this) {
@@ -101,7 +136,20 @@ sealed class Result<R, E> with _$Result<R, E> {
         Err() => false,
       };
 
-  /// Checks if the [Result] contains an error that satisfies the given [predicate].
+  /// Returns [true] if the result is [Err] and the error inside matches the given [predicate].
+  ///
+  /// # Examples
+  ///
+  /// ```dart
+  /// final ok = Result<int, String>.ok(1);
+  /// assert(ok.isErrAnd((error) => error == 'error') == false);
+  ///
+  /// final errPass = Result<int, String>.err('error');
+  /// assert(errPass.isErrAnd((error) => error == 'error') == true);
+  ///
+  /// final errFail = Result<int, String>.err('error2');
+  /// assert(errFail.isErrAnd((error) => error == 'error') == false);
+  /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   bool isErrAnd(bool Function(E) predicate) => switch (this) {
@@ -109,6 +157,17 @@ sealed class Result<R, E> with _$Result<R, E> {
         Err(:final error) => predicate(error),
       };
 
+  /// Converts from [Result<R, E>] to [Option<R>].
+  ///
+  /// # Examples
+  ///
+  /// ```dart
+  /// final ok = Result<int, String>.ok(2);
+  /// assert(ok.ok() == Some(2));
+  ///
+  /// final err = Result<int, String>.err('error');
+  /// assert(err.ok() == None());
+  /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   Option<R> ok() => switch (this) {
@@ -116,6 +175,17 @@ sealed class Result<R, E> with _$Result<R, E> {
         Err() => Option<R>.none(),
       };
 
+  /// Converts from [Result<R, E>] to [Option<E>].
+  ///
+  /// # Examples
+  ///
+  /// ```dart
+  /// final ok = Result<int, String>.ok(2);
+  /// assert(ok.err() == None());
+  ///
+  /// final err = Result<int, String>.err('error');
+  /// assert(err.err() == Some('error'));
+  /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   Option<E> err() => switch (this) {
@@ -123,7 +193,20 @@ sealed class Result<R, E> with _$Result<R, E> {
         Err(:final error) => Option.some(error),
       };
 
-  /// Maps the value in the [Result] if it is [isOk], otherwise returns [Result.err].
+  /// Maps a [Result<R, E>] to [Result<R2, E>] by applying a function to a
+  /// contained [Ok] value, leaving an [Err] value untouched.
+  ///
+  /// This function can be used to compose the results of two functions.
+  ///
+  /// # Examples
+  ///
+  /// ```dart
+  /// final ok = Result<int, String>.ok(2);
+  /// assert(ok.map((value) => value + 1) == Result<int, String>.ok(3));
+  ///
+  /// final err = Result<int, String>.err('error');
+  /// assert(err.map((value) => value + 1) == Result<int, String>.err('error'));
+  /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   Result<R2, E> map<R2>(R2 Function(R) fn) => switch (this) {
@@ -131,7 +214,22 @@ sealed class Result<R, E> with _$Result<R, E> {
         Err(:final error) => Result.err(error),
       };
 
-  /// Maps the value in the [Result] if it is [isOk], otherwise returns [or].
+  /// Returns the provided default [or] (if [Err]), or applies a function to the
+  /// contained value (if [Ok]),
+  ///
+  /// Arguments passed to `mapOr` are eagerly evaluated; if you are passing the
+  /// result of a function call, it is recommended to use [mapOrElse], which is
+  /// lazily evaluated.
+  ///
+  /// # Examples
+  ///
+  /// ```dart
+  /// final ok = Result<int, String>.ok(1);
+  /// assert(ok.mapOr(or: 5, map: (value) => value + 1) == 2);
+  ///
+  /// final err = Result<int, String>.err('error');
+  /// assert(err.mapOr(or: 5, map: (value) => value + 1) == 5);
+  /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   R2 mapOr<R2>({required R2 Function(R) map, required R2 or}) => switch (this) {
@@ -139,7 +237,21 @@ sealed class Result<R, E> with _$Result<R, E> {
         Err() => or,
       };
 
-  /// Maps the value in the [Result] if it is [isOk], otherwise returns the value returned by the provided [orElse] function.
+  /// Maps a [Result<R, E>] to [R2] by applying a fallback function [orElse] to
+  /// a contained [Err] value, or a function [map] to a contained [Ok] value.
+  ///
+  /// This function can be used to unpack a successful result while
+  /// handling an error.
+  ///
+  /// # Examples
+  ///
+  /// ```dart
+  /// final ok = Result<int, String>.ok(2);
+  /// assert(ok.mapOrElse(map: (value) => value + 1, orElse: (error) => 0) == 3);
+  ///
+  /// final err = Result<int, String>.err('error');
+  /// assert(err.mapOrElse(map: (value) => value + 1, orElse: (error) => 0) == 0);
+  /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   R2 mapOrElse<R2>({
@@ -151,7 +263,21 @@ sealed class Result<R, E> with _$Result<R, E> {
         Err(:final error) => orElse(error),
       };
 
-  /// Maps the error in the [Result] if it is [isErr], otherwise returns [Result.ok].
+  /// Maps a [Result<R, E>] to [Result<R, E2>] by applying a function to a
+  /// contained [Err] value, leaving an [Ok] value untouched.
+  ///
+  /// This function can be used to pass through a successful result while
+  /// handling an error.
+  ///
+  /// # Examples
+  ///
+  /// ```dart
+  /// final ok = Result<int, String>.ok(2);
+  /// assert(ok.mapErr((error) => 'error') == Result<int, String>.ok(2));
+  ///
+  /// final err = Result<int, String>.err('error');
+  /// assert(err.mapErr((error) => 'error2') == Result<int, String>.err('error2'));
+  /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   Result<R, E2> mapErr<E2>(E2 Function(E) fn) => switch (this) {
@@ -159,6 +285,17 @@ sealed class Result<R, E> with _$Result<R, E> {
         Err(:final error) => Result.err(fn(error)),
       };
 
+  /// Calls [fn] on the contained value if the result is [Ok], and returns [this]
+  ///
+  /// # Examples
+  ///
+  /// ```dart
+  /// final ok = Result<int, String>.ok(2);
+  /// ok.inspect((value) => print(value)); // prints 2
+  ///
+  /// final err = Result<int, String>.err('error');
+  /// err.inspect((value) => print(value)); // does nothing
+  /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   Result<R, E> inspect(void Function(R) fn) {
@@ -172,6 +309,17 @@ sealed class Result<R, E> with _$Result<R, E> {
     }
   }
 
+  /// Calls [fn] on the contained error if the result is [Err], and returns [this].
+  ///
+  /// # Examples
+  ///
+  /// ```dart
+  /// final ok = Result<int, String>.ok(2);
+  /// ok.inspectErr((error) => print(error)); // does nothing
+  ///
+  /// final err = Result<int, String>.err('error');
+  /// err.inspectErr((error) => print(error)); // prints 'error'
+  /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   Result<R, E> inspectErr(void Function(E) fn) {
@@ -184,11 +332,45 @@ sealed class Result<R, E> with _$Result<R, E> {
     }
   }
 
+  /// Returns an iterator over the possibly contained value.
+  ///
+  /// # Examples
+  ///
+  /// ```
+  /// final xiter = Resutl<int, String>.ok(4).iter;
+  /// assert(iter.moveNext() == true);
+  /// assert(iter.current == 4);
+  ///
+  /// final yiter = Result<int, String>.err('error').iter;
+  /// assert(iter.moveNext() == false);
+  /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   Iterable<R> get iter => SingleElementIter(ok());
 
-  /// Returns the value in the [Result] if it is [isOk], otherwise throws a [StateError] with the provided message.
+  /// Returns the contained [Ok] value.
+  ///
+  /// Because this function may throw, its use is generally discouraged.
+  /// Instead, prefer to use pattern matching and handle the [Err] case explicitly,
+  /// or call [unwrapOr] or [unwrapOrElse]. Some primitive types
+  /// also provide an [unwrapOrDefault] extension method to provide a default value.
+  ///
+  /// # Throws
+  ///
+  /// Throws a [StateError] with the provided [message] if the result is [Err].
+  ///
+  /// # Examples
+  ///
+  /// ```dart
+  /// final ok = Result<int, String>.ok(2);
+  /// assert(ok.unwrap('error') == 2);
+  ///
+  /// final err = Result<int, String>.err('error');
+  /// err.unwrap('is an error'); // throws StateError('is an error')
+  /// ```
+  ///
+  /// We recommend that [expect] messages are used to describe the reason
+  /// you _expect_ the [Result] should be [Ok].
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   R expect(String message) => switch (this) {

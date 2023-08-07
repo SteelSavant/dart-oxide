@@ -193,6 +193,11 @@ sealed class Option<T> with _$Option<T> {
 
   /// Returns the value in the [Option] if it is [Some], otherwise throws a [StateError] with the provided message.
   ///
+  /// Because this funciton may throw, its use is generally discouraged.
+  /// Instead, prefer to use pattern matching and handle the [None] case explicitly,
+  /// or call [unwrapOr] or [unwrapOrElse] to provide a default value. Some primitive types
+  /// also provide an [unwrapOrDefault] extension method to provide a default value.
+  ///
   /// # Throws
   ///
   /// Throws a [StateError] with the provided message if the [Option] is [None].

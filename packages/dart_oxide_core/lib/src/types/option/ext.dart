@@ -19,7 +19,7 @@ extension NullableToOptionExt<T> on T? {
 
 /// Extensions on [Iterable<Option\<T\>>].
 /// Provides additional methods for mapping and filtering based on the [Option] variant.
-extension IterableOption<T> on Iterable<Option<T>> {
+extension IterableOptionExt<T> on Iterable<Option<T>> {
   /// Filters the [Iterable] to only [Some] values, returns an [Iterable] containing
   /// the unwrapped values.
   ///
@@ -120,7 +120,7 @@ extension IterableOption<T> on Iterable<Option<T>> {
   }
 }
 
-extension StreamOption<T> on Stream<Option<T>> {
+extension StreamOptionExt<T> on Stream<Option<T>> {
   /// Filters the [Stream] to only [Some] values, returns a [Stream] containing
   /// the unwrapped values.
   ///

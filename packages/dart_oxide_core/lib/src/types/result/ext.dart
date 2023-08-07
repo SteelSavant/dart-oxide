@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:dart_oxide_core/types.dart';
 
-extension IterableResult<R, E> on Iterable<Result<R, E>> {
+extension IterableResultExt<R, E> on Iterable<Result<R, E>> {
   Iterable<R> whereOk() sync* {
     for (final option in this) {
       switch (option) {
@@ -34,7 +34,7 @@ extension IterableResult<R, E> on Iterable<Result<R, E>> {
       );
 }
 
-extension StreamResult<R, E> on Stream<Result<R, E>> {
+extension StreamResultExt<R, E> on Stream<Result<R, E>> {
   Stream<R> whereOk() async* {
     await for (final option in this) {
       switch (option) {
