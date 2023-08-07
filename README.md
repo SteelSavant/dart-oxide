@@ -24,3 +24,7 @@ This package provides some of the same types as [fpdart](https://pub.dev/package
 ## Usage
 
 Refer to the class and method documentation, or the tests, for basic usage.
+
+### Additional Information
+
+Currently, this project is structured as a monorepo, with the intention of adding more features via lints and possibly code generation using other packages. However, as I do not currently write use Dart/Flutter for any projects, these additional packages may or may not actually be created.
