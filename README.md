@@ -13,6 +13,8 @@ This package provides some of the same types as [fpdart](https://pub.dev/package
 - `Result<R, E>` type, to make error handling more explicit. It prevents scenarios where bugs can be introduced if a `throw` is introduced in a called function, but the calling code is not updated to `try/catch` the new exception. It provides an `Ok(R)` variant if successful, and an `Err(E)` variant if there was an error.
 - `Newtype`, a basic wrapper around any type that is guaranteed not to unify with the original type. Only useful for simple types (like Ids), since no methods or operators can be forwarded to the new type. Will likely be replaced by [extension types](https://github.com/dart-lang/language/issues/2727) when the feature is complete.
 
+Extensions on `Iterable`s and `Stream`s of `Option` and `Result` are provided, to make working with them more ergonomic.
+
 ### Resource Management
 
 - A set of interfaces for disposable objects (`IDisposable` and `IFutureDisposable<U>`). `IFutureDisposable<U>` is generic over the return type to allow it to `U` to represent a `Future`, `FutureOr`, or to unify with the synchronous `IDisposable`.
