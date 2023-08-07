@@ -18,73 +18,33 @@ sealed class Result<R, E> with _$Result<R, E> {
   /// Creates a [Result] that contains an error.
   const factory Result.err(E error) = Err<R, E>;
 
-  // TODO::figure out good ergonomics for guard clauses
-  // @useResult
-  // static Result<R, E> guard<R, E, X>(
-  //   R Function() fn, {
-  //   required E Function(X) onErr, // type inference seems to fail here if X is same type as E
-  // }) {
-  //   try {
-  //     return Result<R, E>.ok(fn());
-  //   } on X catch (e) {
-  //     return Result<R, E>.err(onErr(e));
-  //   }
-  // }
+  /// Executes the given [fn] and returns [Ok] if no exception is thrown,
+  /// otherwise returns [Err] with the thrown exception mapped to [E] by [onError].
+  /// Both [fn] and [onError] must be synchronous.
+  static Result<R, E> guard<R, E, X extends Object>(
+    R Function() fn, {
+    required E Function(X) onError,
+  }) {
+    try {
+      return Result.ok(fn());
+    } on X catch (error) {
+      return Result.err(onError(error));
+    }
+  }
 
-  // @useResult
-  // static Result<R, Exception> guardException<R>(R Function() fn) {
-  //   try {
-  //     return Result<R, Exception>.ok(fn());
-  //   } on Exception catch (e) {
-  //     return Result<R, Exception>.err(e);
-  //   }
-  // }
-
-  // @useResult
-  // static Result<R, Object> guardAny<R>(R Function() fn) {
-  //   try {
-  //     return Result<R, Exception>.ok(fn());
-  //   } catch (e) {
-  //     return Result<R, Object>.err(e);
-  //   }
-  // }
-
-  // @useResult
-  // static Future<Result<R, E>> guardAsync<R, E, X extends Object>(
-  //   Future<R> Function() fn, {
-  //   required FutureOr<E> Function(X) onErr,
-  // }) async {
-  //   try {
-  //     return Result<R, E>.ok(await fn());
-  //   } on X catch (e) {
-  //     final err = onErr(e);
-  //     return err is Future
-  //         ? Result<R, E>.err(await err)
-  //         : Result<R, E>.err(err);
-  //   }
-  // }
-
-  // @useResult
-  // static Future<Result<R, Exception>> guardExceptionAsync<R>(
-  //   Future<R> Function() fn,
-  // ) async {
-  //   try {
-  //     return Result<R, Exception>.ok(await fn());
-  //   } on Exception catch (e) {
-  //     return Result<R, Exception>.err(e);
-  //   }
-  // }
-
-  // @useResult
-  // static Future<Result<R, Object>> guardAnyAsync<R>(
-  //   Future<R> Function() fn,
-  // ) async {
-  //   try {
-  //     return Result<R, Exception>.ok(await fn());
-  //   } catch (e) {
-  //     return Result<R, Object>.err(e);
-  //   }
-  // }
+  /// Executes the given [fn] and returns [Ok] if no exception is thrown,
+  /// otherwise returns [Err] with the thrown exception mapped to [E] by [onError].
+  /// Any of [fn] and [onError] may be asynchronous.
+  static Future<Result<R, E>> guardAsync<R, E, X extends Object>(
+    FutureOr<R> Function() fn, {
+    required FutureOr<E> Function(X) onError,
+  }) async {
+    try {
+      return Result<R, E>.ok(await fn());
+    } on X catch (error) {
+      return Result.err(await onError(error));
+    }
+  }
 
   /// Returns [true] if the result is [Ok]
   ///
@@ -637,11 +597,11 @@ extension ResultOption<R, E> on Result<Option<R>, E> {
   /// ```dart
   /// final x = Result<Option<int>, String>.ok(Some(5));
   /// final y = Option<Result<int, String>>.some(Result.ok(5));
-  /// assert(x.transpose() == y);
+  /// assert(x.transposed == y);
   /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
-  Option<Result<R, E>> transpose() => switch (this) {
+  Option<Result<R, E>> get transposed => switch (this) {
         Ok(:final value) => value.map(Result.ok),
         Err(:final error) => Some(Result.err(error)),
       };
@@ -655,11 +615,11 @@ extension ResultFuture<R, E> on Result<Future<R>, Future<E>> {
   /// ```dart
   /// final x = Result<Future<int>, Future<String>>.ok(Future.value(5));
   /// final y = Future<Result<int, String>>.value(Result.ok(5));
-  /// assert(x.future == y);
+  /// assert(x.wait == y);
   /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
-  Future<Result<R, E>> get future => switch (this) {
+  Future<Result<R, E>> get wait => switch (this) {
         Ok(:final value) => value.then(Result.ok),
         Err(:final error) => error.then(Result.err),
       };
@@ -673,11 +633,11 @@ extension ResultFutureOk<R, E> on Result<Future<R>, E> {
   /// ```dart
   /// final x = Result<Future<int>, String>.ok(Future.value(5));
   /// final y = Future<Result<int, String>>.value(Result.ok(5));
-  /// assert(x.future == y);
+  /// assert(x.wait == y);
   /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
-  Future<Result<R, E>> get future => switch (this) {
+  Future<Result<R, E>> get wait => switch (this) {
         Ok(:final value) => value.then(Result.ok),
         Err(:final error) => Future.value(Result.err(error)),
       };
@@ -691,11 +651,11 @@ extension ResultFutureErr<R, E> on Result<R, Future<E>> {
   /// ```dart
   /// final x = Result<int, Future<String>>.err(Future.value('error'));
   /// final y = Future<Result<int, String>>.value(Result.err('error'));
-  /// assert(x.future == y);
+  /// assert(x.wait == y);
   /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
-  Future<Result<R, E>> get future => switch (this) {
+  Future<Result<R, E>> get wait => switch (this) {
         Ok(:final value) => Future.value(Result.ok(value)),
         Err(:final error) => error.then(Result.err),
       };
@@ -708,16 +668,16 @@ extension ResultResult<R, E> on Result<Result<R, E>, E> {
   ///
   /// ```
   /// final ok = Result<Result<int, String>, String>.ok(Result.ok(1));
-  /// assert(ok.flatten() == Result.ok(1));
+  /// assert(ok.flattened == Result.ok(1));
   ///
   /// final err = Result<Result<int, String>, String>.err('error');
-  /// assert(err.flatten() == Result.err('error'));
+  /// assert(err.flattened == Result.err('error'));
   /// ```
   ///
   /// Flattening only removes one level of nesting at a time.
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
-  Result<R, E> flatten() => switch (this) {
+  Result<R, E> get flattened => switch (this) {
         Ok(:final value) => value,
         Err(:final error) => Result.err(error),
       };

@@ -420,13 +420,13 @@ void main() {
     test('Test unzip on Some', () {
       const x = Option.some((1, 2));
 
-      expect(x.unzip()).toEqual((const Option.some(1), const Option.some(2)));
+      expect(x.unzipped).toEqual((const Option.some(1), const Option.some(2)));
     });
 
     test('Test unzip on None', () {
       const x = Option<(int, int)>.none();
 
-      expect(x.unzip()).toEqual((const Option.none(), const Option.none()));
+      expect(x.unzipped).toEqual((const Option.none(), const Option.none()));
     });
 
     test('Test future on Some', () async {
@@ -444,37 +444,37 @@ void main() {
     test('Test transpose on Some Ok', () {
       const x = Option.some(Ok<int, String>(1));
 
-      expect(x.transpose()).toEqual(const Ok(Option.some(1)));
+      expect(x.transposed).toEqual(const Ok(Option.some(1)));
     });
 
     test('Test transpose on Some Err', () {
       const x = Option.some(Err<int, String>('Error'));
 
-      expect(x.transpose()).toEqual(const Err('Error'));
+      expect(x.transposed).toEqual(const Err('Error'));
     });
 
     test('Test transpose on None', () {
       const x = Option<Result<int, String>>.none();
 
-      expect(x.transpose()).toEqual(const Ok(Option<int>.none()));
+      expect(x.transposed).toEqual(const Ok(Option<int>.none()));
     });
 
     test('Test Option flatten on Some', () {
       const x = Option.some(Option.some(1));
 
-      expect(x.flatten()).toEqual(const Option.some(1));
+      expect(x.flattened).toEqual(const Option.some(1));
     });
 
     test('Test Option flatten on None', () {
       const x = Option<Option<int>>.none();
 
-      expect(x.flatten()).toEqual(const Option.none());
+      expect(x.flattened).toEqual(const Option.none());
     });
 
     test('Test Option flatten on Some of None', () {
       const x = Option.some(Option<int>.none());
 
-      expect(x.flatten()).toEqual(const Option.none());
+      expect(x.flattened).toEqual(const Option.none());
     });
 
     test('Test bool unwrapOrDefault on Some', () {
@@ -757,6 +757,28 @@ void main() {
       const y = Result<int, String>.err('Error');
 
       expect(x).toEqual(y);
+    });
+
+    test('Test guard on success', () {
+      expect(Result.guard(() => 1, onError: (e) => 'Error'))
+          .toEqual(const Ok(1));
+    });
+
+    test('Test guard on failure', () {
+      expect(Result.guard(() => throw Exception(), onError: (e) => 'Error'))
+          .toEqual(const Err('Error'));
+    });
+
+    test('Test guardAsync on success', () async {
+      await expect(
+        Result.guardAsync(() => Future.value(1), onError: (e) => 'Error'),
+      ).completion.toEqual(const Ok(1));
+    });
+
+    test('Test guardAsync on failure', () async {
+      await expect(
+        Result.guardAsync(() => throw Exception(), onError: (e) => 'Error'),
+      ).completion.toEqual(const Err('Error'));
     });
 
     test('Test Result isOk on Ok', () {
@@ -1089,67 +1111,67 @@ void main() {
     test('Test transpose on Ok Some', () {
       const x = Result<Option<int>, String>.ok(Option.some(1));
 
-      expect(x.transpose()).toEqual(const Option.some(Result.ok(1)));
+      expect(x.transposed).toEqual(const Option.some(Result.ok(1)));
     });
 
     test('Test transpose on Ok None', () {
       const x = Result<Option<int>, String>.ok(Option<int>.none());
 
-      expect(x.transpose()).toEqual(const Option.none());
+      expect(x.transposed).toEqual(const Option.none());
     });
 
     test('Test transpose on Err', () {
       const x = Result<Option<int>, String>.err('Error');
 
-      expect(x.transpose()).toEqual(const Option.some(Result.err('Error')));
+      expect(x.transposed).toEqual(const Option.some(Result.err('Error')));
     });
 
     test('Test future Ok Err on Ok', () async {
       final x = Result<Future<int>, Future<String>>.ok(Future.value(1));
 
-      await expect(x.future).completion.toEqual(const Result.ok(1));
+      await expect(x.wait).completion.toEqual(const Result.ok(1));
     });
 
     test('Test future Ok Err on Err', () async {
       final x = Result<Future<int>, Future<String>>.err(Future.value('Error'));
 
-      await expect(x.future).completion.toEqual(const Result.err('Error'));
+      await expect(x.wait).completion.toEqual(const Result.err('Error'));
     });
 
     test('Test future Ok on Ok', () async {
       final x = Result<Future<int>, String>.ok(Future.value(1));
 
-      await expect(x.future).completion.toEqual(const Result.ok(1));
+      await expect(x.wait).completion.toEqual(const Result.ok(1));
     });
 
     test('Test future Ok on Err', () async {
       const x = Result<Future<int>, String>.err('Error');
 
-      await expect(x.future).completion.toEqual(const Result.err('Error'));
+      await expect(x.wait).completion.toEqual(const Result.err('Error'));
     });
 
     test('Test future Err', () async {
       final x = Result<int, Future<String>>.err(Future.value('Error'));
 
-      await expect(x.future).completion.toEqual(const Result.err('Error'));
+      await expect(x.wait).completion.toEqual(const Result.err('Error'));
     });
 
     test('Test flatten on Ok Ok', () {
       const x = Result<Result<int, String>, String>.ok(Result.ok(1));
 
-      expect(x.flatten()).toEqual(const Result.ok(1));
+      expect(x.flattened).toEqual(const Result.ok(1));
     });
 
     test('Test flatten on Ok Err', () {
       const x = Result<Result<int, String>, String>.ok(Result.err('Error'));
 
-      expect(x.flatten()).toEqual(const Result.err('Error'));
+      expect(x.flattened).toEqual(const Result.err('Error'));
     });
 
     test('Test flatten on Err', () {
       const x = Result<Result<int, String>, String>.err('Error');
 
-      expect(x.flatten()).toEqual(const Result.err('Error'));
+      expect(x.flattened).toEqual(const Result.err('Error'));
     });
 
     test('Test unwrapOrDefault on bool success', () {

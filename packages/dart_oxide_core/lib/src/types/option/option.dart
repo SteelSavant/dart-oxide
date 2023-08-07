@@ -632,7 +632,7 @@ extension OptionRecordExt<T, R> on Option<(T, R)> {
   /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
-  (Option<T>, Option<R>) unzip() => switch (this) {
+  (Option<T>, Option<R>) get unzipped => switch (this) {
         Some(:final value) => (Option.some(value.$1), Option.some(value.$2)),
         None() => (Option<T>.none(), Option<R>.none()),
       };
@@ -669,11 +669,11 @@ extension OptionResult<R, E> on Option<Result<R, E>> {
   /// final x = Ok(Some(5));
   /// final y = Some(Ok(5));
   ///
-  /// assert(x == y.transpose());
+  /// assert(x == y.transposed);
   /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
-  Result<Option<R>, E> transpose() => switch (this) {
+  Result<Option<R>, E> get transposed => switch (this) {
         Some(value: Ok(:final value)) => Ok(Some(value)),
         Some(value: Err(:final error)) => Err(error),
         None() => Ok(None<R>()),
@@ -691,9 +691,9 @@ extension OptionOptionExt<T> on Option<Option<T>> {
   /// final y = None<Option<int>>();
   /// final z = Some(None<int>());
   ///
-  /// assert(x.flatten() == Some(1));
-  /// assert(y.flatten() == None<int>());
-  /// assert(z.flatten() == None<int>());
+  /// assert(x.flattened == Some(1));
+  /// assert(y.flattened == None<int>());
+  /// assert(z.flattened == None<int>());
   /// ```
   ///
   /// Flattening only removes one level of nesting at a time.
@@ -701,12 +701,12 @@ extension OptionOptionExt<T> on Option<Option<T>> {
   /// ```
   /// final x = Some(Some(Some(1)));
   ///
-  /// assert(x.flatten() == Some(Some(1)));
-  /// assert(x.flatten().flatten() == Some(1));
+  /// assert(x.flattened == Some(Some(1)));
+  /// assert(x.flattened.flattened == Some(1));
   /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
-  Option<T> flatten() => unwrapOr(Option<T>.none());
+  Option<T> get flattened => unwrapOr(Option<T>.none());
 }
 
 extension OptionBoolExt on Option<bool> {
