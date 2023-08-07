@@ -6,7 +6,8 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 // TODO::annotation to force users to box/cell constructed disposable types
 
 /// Runs the given [action] with the given [resource] and then disposes it.
-/// The [action] must be synchronous.
+/// The [action] must be synchronous. The [resource] will be disposed even if
+/// the [action] throws.
 ///
 /// # Throws
 ///
@@ -22,7 +23,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 /// );
 /// assert(y == 3);
 /// ```
-R using<T extends IAsyncDisposable<()>, R>(
+R using<T extends IDisposable, R>(
   T resource,
   R Function(T) action,
 ) {
@@ -34,7 +35,8 @@ R using<T extends IAsyncDisposable<()>, R>(
 }
 
 /// Runs the given [action] with the given [resource] and then disposes it.
-/// Any of the [action] or the [resource] may be asynchronous.
+/// Any of the [action] or the [resource] may be asynchronous. The [resource]
+/// will be disposed even if the [action] throws.
 ///
 /// # Throws
 ///
@@ -50,7 +52,7 @@ R using<T extends IAsyncDisposable<()>, R>(
 /// );
 /// assert(y == 3);
 /// ```
-Future<R> usingAsync<T extends IAsyncDisposable<U>, U extends FutureOr<()>, R>(
+Future<R> usingAsync<T extends IFutureDisposable<U>, U extends FutureOr<()>, R>(
   T resource,
   FutureOr<R> Function(T) action,
 ) async {
@@ -58,7 +60,7 @@ Future<R> usingAsync<T extends IAsyncDisposable<U>, U extends FutureOr<()>, R>(
     return await action(resource);
   } finally {
     // ignore: unnecessary_cast, cast is necessary to satisfy the type checker
-    await (resource as IAsyncDisposable<FutureOr<()>>).dispose();
+    await (resource as IFutureDisposable<FutureOr<()>>).dispose();
   }
 }
 
@@ -76,15 +78,15 @@ extension IDisposableExt<T extends IDisposable> on T {
   Rc<T, ()> toRc() => Rc.fromDisposable<T>(this);
 }
 
-extension IDisposableAsyncExt<T extends IAsyncDisposable<U>,
+extension IDisposableAsyncExt<T extends IFutureDisposable<U>,
     U extends FutureOr<()>> on T {
-  /// Returns a [Box] that wraps this [IAsyncDisposable].
+  /// Returns a [Box] that wraps this [IFutureDisposable].
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   @useResult
   Box<T, U> toBox() => Box.fromAsyncDisposable<T, U>(this);
 
-  /// Returns a [Rc] that wraps this [IAsyncDisposable].
+  /// Returns a [Rc] that wraps this [IFutureDisposable].
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   @useResult

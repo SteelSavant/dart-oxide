@@ -246,8 +246,6 @@ extension StreamOptionExt<T> on Stream<Option<T>> {
 
   /// Returns a stream that emits the same events as this stream, except that data
   /// events are not emitted until a data event is [Some].
-  /// If the call throws, the error is emitted as an error event on the returned
-  /// stream instead of the data event.
 
   /// Error and done events are provided by the returned stream unmodified.
 

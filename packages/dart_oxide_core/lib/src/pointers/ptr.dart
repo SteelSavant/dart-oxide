@@ -14,7 +14,7 @@ part 'ptr.freezed.dart';
 ///
 /// Accessing an [IDisposable] after calling [dispose], including calling [dispose]
 /// again, is undefined behavior.
-abstract interface class IAsyncDisposable<U extends FutureOr<()>> {
+abstract interface class IFutureDisposable<U extends FutureOr<()>> {
   /// Disposes the object, preventing further use.
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
@@ -27,7 +27,7 @@ abstract interface class IAsyncDisposable<U extends FutureOr<()>> {
 ///
 /// Accessing an [IDisposable] after calling [dispose], including calling [dispose]
 /// again, is undefined behavior.
-typedef IDisposable = IAsyncDisposable<()>;
+typedef IDisposable = IFutureDisposable<()>;
 
 @Freezed(copyWith: false)
 class _BoxFinalizable<T> with _$_BoxFinalizable<T> {
@@ -73,7 +73,7 @@ class _CountedBoxFinalizable<T>
 /// [()] is used instead of [void] to prevent collections from unifying to [void] instead of [FutureOr<void>].
 @internal
 abstract final class BaseBox<T extends Object, U extends FutureOr<()>>
-    implements IAsyncDisposable<U> {
+    implements IFutureDisposable<U> {
   static final Finalizer<_BoxFinalizable<dynamic>> _finalizer =
       Finalizer((value) => value.finalize());
   T? _value;
@@ -268,18 +268,18 @@ final class Box<T extends Object, U extends FutureOr<()>>
         finalize: finalize,
       );
 
-  /// Creates a new [Box] that points to the provided value. The [IAsyncDisposable]
+  /// Creates a new [Box] that points to the provided value. The [IFutureDisposable]
   /// will be disposed when this [Box] is disposed. If [finalize] is [true],
   /// this [Box] will be attached to a finalizer, which will dispose [value]
   /// when this [Box] becomes unreachable.
   ///
-  /// Due to the nature of [Finalizer], [IAsyncDisposable.dispose] is not guaranteed to be invoked.
+  /// Due to the nature of [Finalizer], [IFutureDisposable.dispose] is not guaranteed to be invoked.
   ///
   /// # Undefined Behavior
   ///
   /// Disposing [value] from outside of this [Box] is undefined behavior, and
   /// may result in a double free, or cause arbitrary methods to throw.
-  static Box<T, U> fromAsyncDisposable<T extends IAsyncDisposable<U>,
+  static Box<T, U> fromAsyncDisposable<T extends IFutureDisposable<U>,
           U extends FutureOr<()>>(
     T value, {
     bool finalize = true,
@@ -301,7 +301,7 @@ final class Box<T extends Object, U extends FutureOr<()>>
 /// underlying value is disposed. [()] is used instead of [void] to prevent
 /// the return type from unifying to [void] instead of [FutureOr<void>].
 final class Rc<T extends Object, U extends FutureOr<()>> extends BaseBox<T, U>
-    implements IAsyncDisposable<U> {
+    implements IFutureDisposable<U> {
   Ptr<int> _count = Ptr(1);
   final bool _finalize;
 
@@ -339,18 +339,18 @@ final class Rc<T extends Object, U extends FutureOr<()>> extends BaseBox<T, U>
         finalize: finalize,
       );
 
-  /// Creates a new [Rc] that points to the provided value. The [IAsyncDisposable]
+  /// Creates a new [Rc] that points to the provided value. The [IFutureDisposable]
   /// will be disposed when the last reference is disposed. If [finalize] is
   /// [true], this [Rc] will be attached to a finalizer, which will dispose
   /// this [Rc] when it becomes unreachable.
   ///
-  /// Due to the nature of [Finalizer], [IAsyncDisposable.dispose] is not guaranteed to be invoked.
+  /// Due to the nature of [Finalizer], [IFutureDisposable.dispose] is not guaranteed to be invoked.
   ///
   /// # Undefined Behavior
   ///
   /// Disposing [value] from outside of this [Rc] is undefined behavior, and
   /// may result in a double free, or cause arbitrary methods to throw.
-  static Rc<T, U> fromAsyncDisposable<T extends IAsyncDisposable<U>,
+  static Rc<T, U> fromAsyncDisposable<T extends IFutureDisposable<U>,
           U extends FutureOr<()>>(
     T value, {
     bool finalize = true,

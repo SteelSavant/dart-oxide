@@ -1074,42 +1074,6 @@ void main() {
           .toEqual(const Result.ok(2));
     });
 
-    test('Test contains on Ok', () {
-      const x = Result<int, String>.ok(1);
-
-      expect(x.contains(1)).toEqual(true);
-    });
-
-    test('Test contains on Ok that fails', () {
-      const x = Result<int, String>.ok(1);
-
-      expect(x.contains(2)).toEqual(false);
-    });
-
-    test('Test contains on Err', () {
-      const x = Result<int, String>.err('Error');
-
-      expect(x.contains(1)).toEqual(false);
-    });
-
-    test('Test containsErr on Ok', () {
-      const x = Result<int, String>.ok(1);
-
-      expect(x.containsErr('Error')).toEqual(false);
-    });
-
-    test('Test containsErr on Err', () {
-      const x = Result<int, String>.err('Error');
-
-      expect(x.containsErr('Error')).toEqual(true);
-    });
-
-    test('Test containsErr on Err that fails', () {
-      const x = Result<int, String>.err('Error');
-
-      expect(x.containsErr('Error2')).toEqual(false);
-    });
-
     test('Test value on Result<R, Never>', () {
       const x = Result<int, Never>.ok(1);
 

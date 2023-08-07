@@ -15,7 +15,7 @@ class _SyncDisposable implements IDisposable {
   () dispose() => (x = 5).toUnit();
 }
 
-class _AsyncDisposable implements IAsyncDisposable<Future<()>> {
+class _AsyncDisposable implements IFutureDisposable<Future<()>> {
   int x = 1;
 
   _AsyncDisposable();

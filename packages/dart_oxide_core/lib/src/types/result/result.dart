@@ -7,6 +7,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'result.freezed.dart';
 
 /// [Result] is a type that represents either success ([Ok]) or failure ([Err]).
+// TODO:: overview
 @Freezed(copyWith: false)
 sealed class Result<R, E> with _$Result<R, E> {
   const Result._();
@@ -378,7 +379,21 @@ sealed class Result<R, E> with _$Result<R, E> {
         Err() => throw StateError(message),
       };
 
-  /// Returns the error in the [Result] if it is [isErr], otherwise throws a [StateError] with the provided message.
+  /// Returns the contained [Err] value.
+  ///
+  /// # Throws
+  ///
+  /// Throws a [StateError] with the provided [message] if the result is [Ok].
+  ///
+  /// # Examples
+  ///
+  /// ```dart
+  /// final ok = Result<int, String>.ok(2);
+  /// ok.expectErr('is an error'); // throws StateError('is an error')
+  ///
+  /// final err = Result<int, String>.err('error');
+  /// assert(err.expectErr('error') == 'error');
+  /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   E expectErr(String message) => switch (this) {
@@ -386,7 +401,26 @@ sealed class Result<R, E> with _$Result<R, E> {
         Err(:final error) => error,
       };
 
-  /// Returns the value in the [Result] if it is [isOk], otherwise throws a [StateError].
+  /// Returns the contained [Ok] value.
+  ///
+  /// Because this function may throw, its use is generally discouraged.
+  /// Instead, prefer to use pattern matching and handle the [Err] case explicitly,
+  /// or call [unwrapOr] or [unwrapOrElse]. Some primitive types also
+  /// provide an [unwrapOrDefault] extension method to provide a default value.
+  ///
+  /// # Throws
+  ///
+  /// Throws a [StateError] if the result is [Err].
+  ///
+  /// # Examples
+  ///
+  /// ```dart
+  /// final ok = Result<int, String>.ok(2);
+  /// assert(ok.unwrap() == 2);
+  ///
+  /// final err = Result<int, String>.err('error');
+  /// err.unwrap(); // throws StateError('Result is Err(error)')
+  /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   R unwrap() => switch (this) {
@@ -394,7 +428,21 @@ sealed class Result<R, E> with _$Result<R, E> {
         Err(:final error) => throw StateError('Result is Err($error)'),
       };
 
-  /// Returns the value in the [Result] if it is [isOk], otherwise returns the provided [or] value.
+  /// Returns the contained [Ok] value or a provided default.
+  ///
+  /// Arguments passed to `unwrapOr` are eagerly evaluated; if you are passing the
+  /// result of a function call, it is recommended to use [unwrapOrElse], which is
+  /// lazily evaluated.
+  ///
+  /// # Examples
+  ///
+  /// ```dart
+  /// final ok = Result<int, String>.ok(2);
+  /// assert(ok.unwrapOr(3) == 2);
+  ///
+  /// final err = Result<int, String>.err('error');
+  /// assert(err.unwrapOr(3) == 3);
+  /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   R unwrapOr(R or) => switch (this) {
@@ -402,7 +450,17 @@ sealed class Result<R, E> with _$Result<R, E> {
         Err() => or,
       };
 
-  /// Returns the value in the [Result] if it is [isOk], otherwise returns the value returned by the provided [orElse] function.
+  /// Returns the contained [Ok] value or computes it from a closure.
+  ///
+  /// # Examples
+  ///
+  /// ```dart
+  /// final ok = Result<int, String>.ok(2);
+  /// assert(ok.unwrapOrElse((error) => 3) == 2);
+  ///
+  /// final err = Result<int, String>.err('error');
+  /// assert(err.unwrapOrElse((error) => 3) == 3);
+  /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   R unwrapOrElse(R Function(E) orElse) => switch (this) {
@@ -410,7 +468,21 @@ sealed class Result<R, E> with _$Result<R, E> {
         Err(:final error) => orElse(error),
       };
 
-  /// Returns the error in the [Result] if it is [isErr], otherwise throws a [StateError].
+  /// Returns the contained [Err] value.
+  ///
+  /// # Throws
+  ///
+  /// Throws a [StateError] if the result is [Ok].
+  ///
+  /// # Examples
+  ///
+  /// ```dart
+  /// final ok = Result<int, String>.ok(2);
+  /// ok.unwrapErr(); // throws StateError('Result is Ok(2)')
+  ///
+  /// final err = Result<int, String>.err('error');
+  /// assert(err.unwrapErr() == 'error');
+  /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   E unwrapErr() => switch (this) {
@@ -418,7 +490,25 @@ sealed class Result<R, E> with _$Result<R, E> {
         Err(:final error) => error,
       };
 
-  /// Returns [res] if the result is [isOk], otherwise returns the [Err] value of [this].
+  /// Returns [res] if the result is [Ok], otherwise returns the [Err] value of [this].
+  ///
+  /// Arguments passed to `and` are eagerly evaluated; if you are passing the
+  /// result of a function call, it is recommended to use [andThen], which is
+  /// lazily evaluated.
+  ///
+  /// # Examples
+  ///
+  /// ```dart
+  /// final ok = Result<int, String>.ok(2);
+  /// final late = Result<int, String>.err('late error');
+  /// final early = Result<int, String>.err('early error');
+  /// final differentOk = Result<String, String>.ok('different ok');
+  ///
+  /// assert(ok.and(late) == Result<int, String>.err('late error'));
+  /// assert(early.and(ok) == Result<int, String>.err('early error'));
+  /// assert(early.and(late) == Result<int, String>.err('early error'));
+  /// assert(ok.and(differentOk) == Result<String, String>.ok('different ok'));
+  /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   Result<U, E> and<U>(Result<U, E> res) => switch (this) {
@@ -426,6 +516,18 @@ sealed class Result<R, E> with _$Result<R, E> {
         Err(:final error) => Result.err(error),
       };
 
+  /// Calls [fn] if the result is [Ok], otherwise returns the [Err] value of [this].
+  ///
+  /// This function can be used for control flow based on [Result] values.
+  /// Often used to chain fallible operations that may return [Err].
+  ///
+  /// # Examples
+  ///
+  /// ```
+  /// final sq = (x) => Result<int, String>.ok((x * x).toString());
+  ///
+  /// assert(Result<int, String>.ok(2).andThen(sq) == Result<int, String>.ok('4'));
+  /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   Result<U, E> andThen<U>(Result<U, E> Function(R) fn) => switch (this) {
@@ -433,6 +535,25 @@ sealed class Result<R, E> with _$Result<R, E> {
         Err(:final error) => Result.err(error)
       };
 
+  /// Returns [res] if the result is [Err], otherwise returns the [Ok] value of [this].
+  ///
+  /// Arguments passed to `or` are eagerly evaluated; if you are passing the
+  /// result of a function call, it is recommended to use [orElse], which is
+  /// lazily evaluated.
+  ///
+  /// # Examples
+  ///
+  /// ```dart
+  /// final ok = Result<int, String>.ok(2);
+  /// final otherOk = Result<int, String>.ok(100);
+  /// final late = Result<int, String>.err('late error');
+  /// final early = Result<int, String>.err('early error');
+  ///
+  /// assert(ok.or(late) == Result<int, String>.ok(2));
+  /// assert(early.or(ok) == Result<int, String>.ok(2));
+  /// assert(early.or(late) == Result<int, String>.err('late error'));
+  /// assert(ok.or(otherOk) == Result<int, String>.ok(2));
+  /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   Result<R, F> or<F>(Result<R, F> err) => switch (this) {
@@ -440,43 +561,84 @@ sealed class Result<R, E> with _$Result<R, E> {
         Err() => err,
       };
 
+  /// Calls [fn] if the result is [Err], otherwise returns the [Ok] value of [this].
+  ///
+  /// This function can be used for control flow based on [Result] values.
+  ///
+  /// # Examples
+  ///
+  /// ```
+  /// final sq = (x) => Result<int, int>.ok(x * x);
+  /// final err = (x) => Result<int, int>.err(x);
+  ///
+  /// assert(Result<int, int>.ok(2).orElse(sq).orElse(sq) == Result<int, int>.ok(2));
+  /// assert(Result<int, int>.ok(2).orElse(err).orElse(sq) == Result<int, int>.ok(2));
+  /// assert(Result<int, int>.err(3).orElse(sq).orElse(err) == Result<int, int>.ok(9));
+  /// assert(Result<int, int>.err(3).orElse(err).orElse(err) == Result<int, int>.err(3));
+  /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   Result<R, F> orElse<F>(Result<R, F> Function(E) fn) => switch (this) {
         Ok(:final value) => Result.ok(value),
         Err(:final error) => fn(error),
       };
-
-  @pragma('vm:prefer-inline')
-  @pragma('dart2js:tryInline')
-  bool contains(R element) => switch (this) {
-        Ok(:final value) => value == element,
-        Err() => false,
-      };
-
-  @pragma('vm:prefer-inline')
-  @pragma('dart2js:tryInline')
-  bool containsErr(E other) => switch (this) {
-        Ok() => false,
-        Err(:final error) => error == other,
-      };
 }
 
 extension InfallibleResult<R> on Result<R, Never> {
-  /// Returns the value in the result. Since the result is infallible, this method never throws.
+  /// Returns the contained [Ok] value, but never panics.
+  ///
+  /// Unlike [unwrap], this method doesn't throw and is only callable
+  /// on [Result]s that are infallible. Therefore, it can be used instead of
+  /// [unwrap] as a maintainability safeguard that will fail to compile if the
+  /// error type of the [Result] is later changed to an error that can actually
+  /// occur.
+  ///
+  /// # Examples
+  ///
+  /// ```dart
+  /// fn foo() => Result<int, Never>.ok(1);
+  ///
+  /// assert(foo().value == 1);
+  /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   R get value => unwrap();
 }
 
 extension InfallibleErrResult<E> on Result<Never, E> {
-  /// Returns the error in the result. Since the err is infallible, this method never throws.
+  /// Returns the contained [Err] value, but never panics.
+  ///
+  /// Unlike [unwrapErr], this method doesn't throw and is only callable
+  /// on [Result]s that always fail. Therefore, it can be used instead of
+  /// [unwrapErr] as a maintainability safeguard that will fail to compile if the
+  /// ok type of the [Result] is later changed to a type that can actually
+  /// occur.
+  ///
+  /// # Examples
+  ///
+  /// ```dart
+  /// fn foo() => Result<Never, String>.err('error');
+  ///
+  /// assert(foo().err == 'error');
+  /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   E get error => unwrapErr();
 }
 
 extension ResultOption<R, E> on Result<Option<R>, E> {
+  /// Transposes a [Result] of an [Option] into an [Option] of a [Result].
+  ///
+  /// [Ok(None)] will be mapped to [None].
+  /// [Ok(Some(_))] and [Err(_)] will be mapped to [Some(Ok(_))] and [Some(Err(_))].
+  ///
+  /// # Examples
+  ///
+  /// ```dart
+  /// final x = Result<Option<int>, String>.ok(Some(5));
+  /// final y = Option<Result<int, String>>.some(Result.ok(5));
+  /// assert(x.transpose() == y);
+  /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   Option<Result<R, E>> transpose() => switch (this) {
@@ -486,6 +648,15 @@ extension ResultOption<R, E> on Result<Option<R>, E> {
 }
 
 extension ResultFuture<R, E> on Result<Future<R>, Future<E>> {
+  /// Converts a [Result] of a [Future] into a [Future] of a [Result].
+  ///
+  /// # Examples
+  ///
+  /// ```dart
+  /// final x = Result<Future<int>, Future<String>>.ok(Future.value(5));
+  /// final y = Future<Result<int, String>>.value(Result.ok(5));
+  /// assert(x.future == y);
+  /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   Future<Result<R, E>> get future => switch (this) {
@@ -495,6 +666,15 @@ extension ResultFuture<R, E> on Result<Future<R>, Future<E>> {
 }
 
 extension ResultFutureOk<R, E> on Result<Future<R>, E> {
+  /// Converts a [Result] of a [Future] into a [Future] of a [Result].
+  ///
+  /// # Examples
+  ///
+  /// ```dart
+  /// final x = Result<Future<int>, String>.ok(Future.value(5));
+  /// final y = Future<Result<int, String>>.value(Result.ok(5));
+  /// assert(x.future == y);
+  /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   Future<Result<R, E>> get future => switch (this) {
@@ -504,6 +684,15 @@ extension ResultFutureOk<R, E> on Result<Future<R>, E> {
 }
 
 extension ResultFutureErr<R, E> on Result<R, Future<E>> {
+  /// Converts a [Result] of a [Future] into a [Future] of a [Result].
+  ///
+  /// # Examples
+  ///
+  /// ```dart
+  /// final x = Result<int, Future<String>>.err(Future.value('error'));
+  /// final y = Future<Result<int, String>>.value(Result.err('error'));
+  /// assert(x.future == y);
+  /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   Future<Result<R, E>> get future => switch (this) {
@@ -513,6 +702,19 @@ extension ResultFutureErr<R, E> on Result<R, Future<E>> {
 }
 
 extension ResultResult<R, E> on Result<Result<R, E>, E> {
+  /// Converts from [Result<Result\<R, E\>, E>] to [Result<R, E>].
+  ///
+  /// # Examples
+  ///
+  /// ```
+  /// final ok = Result<Result<int, String>, String>.ok(Result.ok(1));
+  /// assert(ok.flatten() == Result.ok(1));
+  ///
+  /// final err = Result<Result<int, String>, String>.err('error');
+  /// assert(err.flatten() == Result.err('error'));
+  /// ```
+  ///
+  /// Flattening only removes one level of nesting at a time.
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   Result<R, E> flatten() => switch (this) {
