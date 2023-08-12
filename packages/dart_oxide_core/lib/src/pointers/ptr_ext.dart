@@ -1,8 +1,9 @@
 import 'dart:async';
 
-import 'package:dart_oxide_core/src/pointers/ptr.dart';
-import 'package:dart_oxide_core/types.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+
+import '../../types.dart';
+import 'ptr.dart';
 // TODO::annotation to force users to box/cell constructed disposable types
 
 /// Runs the given [action] with the given [resource] and then disposes it.
@@ -24,8 +25,8 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 /// assert(y == 3);
 /// ```
 R using<T extends IDisposable, R>(
-  T resource,
-  R Function(T) action,
+  final T resource,
+  final R Function(T) action,
 ) {
   try {
     return action(resource);
@@ -53,8 +54,8 @@ R using<T extends IDisposable, R>(
 /// assert(y == 3);
 /// ```
 Future<R> usingAsync<T extends IFutureDisposable<U>, U extends FutureOr<()>, R>(
-  T resource,
-  FutureOr<R> Function(T) action,
+  final T resource,
+  final FutureOr<R> Function(T) action,
 ) async {
   try {
     return await action(resource);
@@ -138,7 +139,7 @@ extension OptionPtrExt<T> on Ptr<Option<T>> {
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   @useResult
-  Option<T> replace(T value) {
+  Option<T> replace(final T value) {
     final old = this.value;
     this.value = Option.some(value);
     return old;
@@ -186,7 +187,7 @@ extension PtrExt<T> on Ptr<T> {
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   @useResult
-  T replace(T value) {
+  T replace(final T value) {
     final old = this.value;
     this.value = value;
     return old;

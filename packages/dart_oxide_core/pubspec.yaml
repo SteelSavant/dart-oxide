@@ -1,6 +1,6 @@
 name: dart_oxide_core
 description: Provides implementations for core features from Rust in Dart.
-version: 0.1.0
+version: 0.2.0
 # repository: https://github.com/my_org/my_repo
 
 environment:
@@ -12,6 +12,7 @@ dependencies:
 
 dev_dependencies:
   build_runner: ^2.3.3
+  dart_oxide_lints: ^1.1.0
   freezed: ^2.3.2
   lints: ^2.0.1
   spec: ^0.2.3

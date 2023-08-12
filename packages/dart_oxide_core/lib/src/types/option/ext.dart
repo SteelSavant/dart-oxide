@@ -1,9 +1,9 @@
-import 'package:dart_oxide_core/types.dart';
+import '../../../types.dart';
 
 /// Extensions on [T?] to convert to [Option<T>].
 extension NullableToOptionExt<T> on T? {
-  /// Converts [this] to [Option<T>].
-  /// If [this] is `null`, returns [None], otherwise returns [Some(this)].
+  /// Converts this to [Option<T>].
+  /// If this is `null`, returns [None], otherwise returns [Some(this)].
   ///
   /// # Examples
   ///
@@ -54,7 +54,7 @@ extension IterableOptionExt<T> on Iterable<Option<T>> {
   ///
   /// assert(some == [2]);
   /// ```
-  Iterable<T> whereSomeAnd(bool Function(T) predicate) sync* {
+  Iterable<T> whereSomeAnd(final bool Function(T) predicate) sync* {
     for (final option in this) {
       switch (option) {
         case Some(:final value) when predicate(value):
@@ -77,7 +77,7 @@ extension IterableOptionExt<T> on Iterable<Option<T>> {
   ///
   /// assert(some == [2, 4, 6]);
   /// ```
-  Iterable<R> mapWhereSome<R>(R Function(T) mapper) sync* {
+  Iterable<R> mapWhereSome<R>(final R Function(T) mapper) sync* {
     for (final option in this) {
       switch (option) {
         case Some(:final value):
@@ -156,7 +156,7 @@ extension StreamOptionExt<T> on Stream<Option<T>> {
   /// await for (final value in stream.whereSomeAnd((value) => value.isEven)) {
   ///   print(value); // prints 2
   /// }
-  Stream<T> whereSomeAnd(bool Function(T) predicate) async* {
+  Stream<T> whereSomeAnd(final bool Function(T) predicate) async* {
     await for (final option in this) {
       switch (option) {
         case Some(:final value) when predicate(value):
@@ -180,7 +180,7 @@ extension StreamOptionExt<T> on Stream<Option<T>> {
   ///   print(value); // prints 2, 4, 6
   /// }
   /// ```
-  Stream<R> mapWhereSome<R>(R Function(T) mapper) async* {
+  Stream<R> mapWhereSome<R>(final R Function(T) mapper) async* {
     await for (final option in this) {
       switch (option) {
         case Some(:final value):
@@ -240,7 +240,7 @@ extension StreamOptionExt<T> on Stream<Option<T>> {
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   Stream<T> takeWhileSome() =>
-      takeWhile((element) => element.isSome).whereSome();
+      takeWhile((final element) => element.isSome).whereSome();
 
   /// Skip data events from this stream while they are [None].
 
@@ -264,5 +264,6 @@ extension StreamOptionExt<T> on Stream<Option<T>> {
   /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
-  Stream<Option<T>> skipWhileNone() => skipWhile((element) => element.isNone);
+  Stream<Option<T>> skipWhileNone() =>
+      skipWhile((final element) => element.isNone);
 }

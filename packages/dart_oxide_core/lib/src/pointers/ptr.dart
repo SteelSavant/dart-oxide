@@ -1,12 +1,13 @@
 import 'dart:async';
 
-import 'package:dart_oxide_core/types.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:stack_trace/stack_trace.dart';
 
+import '../../types.dart';
+
 part 'ptr.freezed.dart';
 
-() _unitFn(void _) => ();
+() _unitFn(final void _) => ();
 
 /// An interface for defining a class that can be disposed, (possibly) asynchronously.
 ///
@@ -25,18 +26,17 @@ abstract interface class IFutureDisposable<U extends FutureOr<()>> {
 ///
 /// # Undefined Behavior
 ///
-/// Accessing an [IDisposable] after calling [dispose], including calling [dispose]
+/// Accessing an [IDisposable] after calling [this.dispose], including calling [this.dispose]
 /// again, is undefined behavior.
 typedef IDisposable = IFutureDisposable<()>;
 
 @Freezed(copyWith: false)
 class _BoxFinalizable<T> with _$_BoxFinalizable<T> {
-  const _BoxFinalizable._();
-
   const factory _BoxFinalizable({
-    required T value,
-    required void Function(T) onFinalize,
+    required final T value,
+    required final void Function(T) onFinalize,
   }) = _BoxFinalizableImpl;
+  const _BoxFinalizable._();
 
   void finalize() => onFinalize(value);
 }
@@ -45,14 +45,14 @@ class _BoxFinalizable<T> with _$_BoxFinalizable<T> {
 class _CountedBoxFinalizable<T>
     with _$_CountedBoxFinalizable<T>
     implements _BoxFinalizable<T> {
-  const _CountedBoxFinalizable._();
-
   factory _CountedBoxFinalizable({
-    @freezed required T value,
-    @freezed required final void Function(T) onFinalize,
-    @freezed required final Ptr<int> count,
+    required final T value,
+    required final void Function(T) onFinalize,
+    required final Ptr<int> count,
+    // ignore: prefer_final_parameters
     required bool isFinalized,
   }) = _CountedBoxFinalizableImpl;
+  const _CountedBoxFinalizable._();
 
   @override
   void finalize() {
@@ -75,7 +75,7 @@ class _CountedBoxFinalizable<T>
 abstract final class BaseBox<T extends Object, U extends FutureOr<()>>
     implements IFutureDisposable<U> {
   static final Finalizer<_BoxFinalizable<dynamic>> _finalizer =
-      Finalizer((value) => value.finalize());
+      Finalizer((final value) => value.finalize());
   T? _value;
   final U Function(T) _drop;
 
@@ -85,13 +85,13 @@ abstract final class BaseBox<T extends Object, U extends FutureOr<()>>
   _BoxFinalizable<T> _createFinalizable();
 
   BaseBox(
-    T value, {
-    required U Function(T) onDispose,
+    final T value, {
+    required final U Function(T) onDispose,
 
     /// Attach this box to a finalizer, which will call [onDispose]
     /// on the stored [value] when the the box becomes unreachable and
     /// the finalizer is run.
-    bool finalize = true,
+    final bool finalize = true,
   })  : _value = value,
         _drop = onDispose {
     if (finalize) {
@@ -152,9 +152,9 @@ abstract final class BaseBox<T extends Object, U extends FutureOr<()>>
   T unwrap() => _value ??= throw StateError(_errorMsg);
 
   /// Returns the protected object, or throws a [StateError] with the provided
-  /// [msg]. If [includeTrace] is [true], the stack trace of the first call to
+  /// [msg]. If [includeTrace] is true, the stack trace of the first call to
   /// [dispose] will be included in the error message. If [includeDisposeTime]
-  /// is [true], the time of the first call to [dispose] will be included in
+  /// is true, the time of the first call to [dispose] will be included in
   /// the error message.
   ///
   /// # Throws
@@ -174,9 +174,9 @@ abstract final class BaseBox<T extends Object, U extends FutureOr<()>>
   @useResult
   @doNotStore
   T expect(
-    String msg, {
-    bool includeTrace = false,
-    bool includeDisposeTime = false,
+    final String msg, {
+    final bool includeTrace = false,
+    final bool includeDisposeTime = false,
   }) =>
       _value ??= switch ((includeTrace, includeDisposeTime)) {
         (true, true) => throw StateError(
@@ -225,10 +225,10 @@ abstract final class BaseBox<T extends Object, U extends FutureOr<()>>
 final class Box<T extends Object, U extends FutureOr<()>>
     extends BaseBox<T, U> {
   /// Creates a new [Box] that points to the provided value. When this box is disposed,
-  /// [onDispose] will be called on [value]. If [finalize]is [true], this [Box]
+  /// [super.onDispose] will be called on [value]. If [super.finalize] is true, this [Box]
   /// will be attached to a finalizer, which will dispose this [Box] when it becomes unreachable.
   ///
-  /// Due to the nature of [Finalizer], [onDispose] is not guaranteed to be invoked.
+  /// Due to the nature of [Finalizer], [super.onDispose] is not guaranteed to be invoked.
   Box(super.value, {required super.onDispose, super.finalize}) : super();
 
   /// Creates a new [Box] that points to the provided value. The value will
@@ -238,18 +238,18 @@ final class Box<T extends Object, U extends FutureOr<()>>
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   @useResult
-  static Box<T, ()> fromValue<T extends Object>(T value) => Box(
+  static Box<T, ()> fromValue<T extends Object>(final T value) => Box(
         value,
         onDispose: _unitFn,
         finalize: false,
       );
 
   /// Creates a new [Box] that points to the provided value. The [IDisposable]
-  /// will be disposed when this [Box] is disposed. If [finalize] is [true],
+  /// will be disposed when this [Box] is disposed. If [finalize] is true,
   /// this [Box] will be attached to a finalizer, which will dispose [value]
   /// when this [Box] becomes unreachable.
   ///
-  /// Due to the nature of [Finalizer], [IDisposable.dispose] is not guaranteed to be invoked.
+  /// Due to the nature of [Finalizer], [value.dispose()] is not guaranteed to be invoked.
   ///
   /// # Undefined Behavior
   ///
@@ -259,17 +259,17 @@ final class Box<T extends Object, U extends FutureOr<()>>
   @pragma('dart2js:tryInline')
   @useResult
   static Box<T, ()> fromDisposable<T extends IDisposable>(
-    T value, {
-    bool finalize = true,
+    final T value, {
+    final bool finalize = true,
   }) =>
       Box(
         value,
-        onDispose: (T v) => v.dispose(),
+        onDispose: (final T v) => v.dispose(),
         finalize: finalize,
       );
 
   /// Creates a new [Box] that points to the provided value. The [IFutureDisposable]
-  /// will be disposed when this [Box] is disposed. If [finalize] is [true],
+  /// will be disposed when this [Box] is disposed. If [finalize] is true,
   /// this [Box] will be attached to a finalizer, which will dispose [value]
   /// when this [Box] becomes unreachable.
   ///
@@ -281,12 +281,12 @@ final class Box<T extends Object, U extends FutureOr<()>>
   /// may result in a double free, or cause arbitrary methods to throw.
   static Box<T, U> fromAsyncDisposable<T extends IFutureDisposable<U>,
           U extends FutureOr<()>>(
-    T value, {
-    bool finalize = true,
+    final T value, {
+    final bool finalize = true,
   }) =>
       Box(
         value,
-        onDispose: (T v) => v.dispose(),
+        onDispose: (final T v) => v.dispose(),
         finalize: finalize,
       );
 
@@ -306,21 +306,21 @@ final class Rc<T extends Object, U extends FutureOr<()>> extends BaseBox<T, U>
   final bool _finalize;
 
   /// Creates a new [Rc] that points to the provided value. When all references
-  /// to the value are dropped, [onDispose] will be called on [value]. If [finalize]
-  /// is [true], this [Rc] will be attached to a finalizer, which will dispose
+  /// to the value are dropped, [super.onDispose] will be called on [value]. If [super.finalize]
+  /// is true, this [Rc] will be attached to a finalizer, which will dispose
   /// this [Rc] when it becomes unreachable.
   ///
-  /// Due to the nature of [Finalizer], [onDispose] is not guaranteed to be invoked.
+  /// Due to the nature of [Finalizer], [super.onDispose] is not guaranteed to be invoked.
   Rc(super.value, {required super.onDispose, super.finalize})
       : _finalize = finalize,
         super();
 
   /// Creates a new [Rc] that points to the provided value. The [IDisposable]
   /// will be disposed when the last reference is disposed. If [finalize] is
-  /// [true], this [Rc] will be attached to a finalizer, which will dispose
+  /// true, this [Rc] will be attached to a finalizer, which will dispose
   /// this [Rc] when it becomes unreachable.
   ///
-  /// Due to the nature of [Finalizer], [IDisposable.dispose] is not guaranteed to be invoked.
+  /// Due to the nature of [Finalizer], [IDisposable.dispose()] is not guaranteed to be invoked.
   ///
   /// # Undefined Behavior
   ///
@@ -330,18 +330,18 @@ final class Rc<T extends Object, U extends FutureOr<()>> extends BaseBox<T, U>
   @pragma('dart2js:tryInline')
   @useResult
   static Rc<T, ()> fromDisposable<T extends IDisposable>(
-    T value, {
-    bool finalize = true,
+    final T value, {
+    final bool finalize = true,
   }) =>
       Rc<T, ()>(
         value,
-        onDispose: (v) => v.dispose(),
+        onDispose: (final v) => v.dispose(),
         finalize: finalize,
       );
 
   /// Creates a new [Rc] that points to the provided value. The [IFutureDisposable]
   /// will be disposed when the last reference is disposed. If [finalize] is
-  /// [true], this [Rc] will be attached to a finalizer, which will dispose
+  /// true, this [Rc] will be attached to a finalizer, which will dispose
   /// this [Rc] when it becomes unreachable.
   ///
   /// Due to the nature of [Finalizer], [IFutureDisposable.dispose] is not guaranteed to be invoked.
@@ -352,12 +352,12 @@ final class Rc<T extends Object, U extends FutureOr<()>> extends BaseBox<T, U>
   /// may result in a double free, or cause arbitrary methods to throw.
   static Rc<T, U> fromAsyncDisposable<T extends IFutureDisposable<U>,
           U extends FutureOr<()>>(
-    T value, {
-    bool finalize = true,
+    final T value, {
+    final bool finalize = true,
   }) =>
       Rc<T, U>(
         value,
-        onDispose: (v) => v.dispose(),
+        onDispose: (final v) => v.dispose(),
         finalize: finalize,
       );
 
@@ -368,7 +368,7 @@ final class Rc<T extends Object, U extends FutureOr<()>> extends BaseBox<T, U>
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   @useResult
-  static Rc<T, ()> fromValue<T extends Object>(T value) => Rc(
+  static Rc<T, ()> fromValue<T extends Object>(final T value) => Rc(
         value,
         onDispose: _unitFn,
         finalize: false,
@@ -376,7 +376,7 @@ final class Rc<T extends Object, U extends FutureOr<()>> extends BaseBox<T, U>
 
   Rc._cloned(
     super.value,
-    Ptr<int> count, {
+    final Ptr<int> count, {
     required super.onDispose,
     required super.finalize,
   })  : _count = count,
@@ -390,12 +390,12 @@ final class Rc<T extends Object, U extends FutureOr<()>> extends BaseBox<T, U>
         isFinalized: false,
       );
 
-  /// Returns a new [Rc] that points to the same value as [this], and increments
+  /// Returns a new [Rc] that points to the same value as this, and increments
   /// the reference count.
   ///
   /// # Throws
   ///
-  /// Throws a [StateError] if [this] is already disposed.
+  /// Throws a [StateError] if this is already disposed.
   ///
   /// # Examples
   ///
@@ -424,7 +424,7 @@ final class Rc<T extends Object, U extends FutureOr<()>> extends BaseBox<T, U>
   ///
   /// # Throws
   ///
-  /// Throws a [StateError] if [this] is already disposed.
+  /// Throws a [StateError] if this is already disposed.
   ///
   /// # Examples
   ///

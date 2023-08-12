@@ -21,6 +21,6 @@ final class NewType<TItem, TBrand> {
   @override
   int get hashCode => $1.hashCode;
   @override
-  bool operator ==(Object? other) =>
+  bool operator ==(final Object? other) =>
       other is NewType<TItem, TBrand> && other.$1 == $1;
 }

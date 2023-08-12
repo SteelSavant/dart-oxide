@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:dart_oxide_core/types.dart';
+import '../../../types.dart';
 
 extension IterableResultExt<R, E> on Iterable<Result<R, E>> {
   /// Filters the [Iterable] to only [Ok] values, returns an [Iterable] containing
@@ -37,7 +37,7 @@ extension IterableResultExt<R, E> on Iterable<Result<R, E>> {
   ///
   /// assert(ok == [2]);
   /// ```
-  Iterable<R> whereOkAnd(bool Function(R) predicate) sync* {
+  Iterable<R> whereOkAnd(final bool Function(R) predicate) sync* {
     for (final option in this) {
       switch (option) {
         case Ok(:final value) when predicate(value):
@@ -59,7 +59,7 @@ extension IterableResultExt<R, E> on Iterable<Result<R, E>> {
   ///
   /// assert(ok == [2, 4, 6, 10]);
   /// ```
-  Iterable<T> mapWhereOk<T>(T Function(R) mapper) sync* {
+  Iterable<T> mapWhereOk<T>(final T Function(R) mapper) sync* {
     for (final option in this) {
       switch (option) {
         case Ok(:final value):
@@ -139,7 +139,7 @@ extension StreamResultExt<R, E> on Stream<Result<R, E>> {
   ///    print(value); // prints 2
   /// }
   /// ```
-  Stream<R> whereOkAnd(bool Function(R) predicate) async* {
+  Stream<R> whereOkAnd(final bool Function(R) predicate) async* {
     await for (final option in this) {
       switch (option) {
         case Ok(:final value) when predicate(value):
@@ -162,7 +162,7 @@ extension StreamResultExt<R, E> on Stream<Result<R, E>> {
   /// await for (final value in stream.mapWhereOk((value) => value * 2)) {
   ///   print(value); // prints 2, 4, 6, 10
   /// }
-  Stream<T> mapWhereSome<T>(T Function(R) mapper) async* {
+  Stream<T> mapWhereSome<T>(final T Function(R) mapper) async* {
     await for (final option in this) {
       switch (option) {
         case Ok(:final value):
@@ -189,7 +189,8 @@ extension StreamResultExt<R, E> on Stream<Result<R, E>> {
   ///    print(value); // prints 1, 2
   /// }
   /// ```
-  Stream<R> takeWhileOk() => takeWhile((element) => element.isOk).whereOk();
+  Stream<R> takeWhileOk() =>
+      takeWhile((final element) => element.isOk).whereOk();
 
   /// Skips data events from this stream while they are [Err].
   ///
@@ -210,7 +211,8 @@ extension StreamResultExt<R, E> on Stream<Result<R, E>> {
   /// await for (final value in stream.skipWhileErr()) {
   ///    print(value); // prints Ok(3), Err(4), Ok(5)
   /// }
-  Stream<Result<R, E>> skipWhileErr() => skipWhile((element) => element.isErr);
+  Stream<Result<R, E>> skipWhileErr() =>
+      skipWhile((final element) => element.isErr);
 
   /// Collects the [Stream] into a [Result] containing a [List] of all [Ok] values.
   /// If any [Err] values are encountered, the first [Err] value is returned.

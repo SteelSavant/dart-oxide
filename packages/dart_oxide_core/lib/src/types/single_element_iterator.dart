@@ -1,6 +1,6 @@
 import 'dart:collection';
 
-import 'package:dart_oxide_core/src/types/option/option.dart';
+import 'option/option.dart';
 
 class SingleElementIter<T> with IterableMixin<T> {
   final Option<T> _option;
@@ -29,7 +29,7 @@ class SingleElementIter<T> with IterableMixin<T> {
   T get single => _option.unwrap();
 
   @override
-  T elementAt(int index) {
+  T elementAt(final int index) {
     if (index == 0) {
       return _option.unwrap();
     } else {

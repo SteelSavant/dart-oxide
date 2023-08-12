@@ -112,19 +112,19 @@ void main() {
     test('Test isSomeAnd on Some', () {
       const x = Option.some(1);
 
-      expect(x.isSomeAnd((_) => true)).toEqual(true);
+      expect(x.isSomeAnd((final _) => true)).toEqual(true);
     });
 
     test('Test isSomeAnd on None', () {
       const x = Option<int>.none();
 
-      expect(x.isSomeAnd((_) => true)).toEqual(false);
+      expect(x.isSomeAnd((final _) => true)).toEqual(false);
     });
 
     test('Test isSomeAnd on Some with false predicate', () {
       const x = Option.some(1);
 
-      expect(x.isSomeAnd((_) => false)).toEqual(false);
+      expect(x.isSomeAnd((final _) => false)).toEqual(false);
     });
 
     test('Test expect on Some', () {
@@ -178,13 +178,13 @@ void main() {
     test('Test map on Some', () {
       const x = Option.some(1);
 
-      expect(x.map((x) => x + 1)).toEqual(const Option.some(2));
+      expect(x.map((final x) => x + 1)).toEqual(const Option.some(2));
     });
 
     test('Test map on None', () {
       const x = Option<int>.none();
 
-      expect(x.map((x) => x + 1)).toEqual(const Option.none());
+      expect(x.map((final x) => x + 1)).toEqual(const Option.none());
     });
 
     test('Test inspect on Some', () {
@@ -192,7 +192,7 @@ void main() {
       var y = 0;
 
       expect(
-        x.inspect((x) {
+        x.inspect((final x) {
           y = x;
         }),
       ).toEqual(x);
@@ -204,7 +204,7 @@ void main() {
       var y = 0;
 
       expect(
-        x.inspect((x) {
+        x.inspect((final x) {
           y = x;
         }),
       ).toEqual(x);
@@ -214,25 +214,25 @@ void main() {
     test('Test mapOr on Some', () {
       const x = Option.some(1);
 
-      expect(x.mapOr(map: (x) => x + 1, or: 5)).toEqual(2);
+      expect(x.mapOr(map: (final x) => x + 1, or: 5)).toEqual(2);
     });
 
     test('Test mapOr on None', () {
       const x = Option<int>.none();
 
-      expect(x.mapOr(map: (x) => x + 1, or: 5)).toEqual(5);
+      expect(x.mapOr(map: (final x) => x + 1, or: 5)).toEqual(5);
     });
 
     test('Test mapOrElse on Some', () {
       const x = Option.some(1);
 
-      expect(x.mapOrElse(map: (x) => x + 1, orElse: () => 5)).toEqual(2);
+      expect(x.mapOrElse(map: (final x) => x + 1, orElse: () => 5)).toEqual(2);
     });
 
     test('Test mapOrElse on None', () {
       const x = Option<int>.none();
 
-      expect(x.mapOrElse(map: (x) => x + 1, orElse: () => 5)).toEqual(5);
+      expect(x.mapOrElse(map: (final x) => x + 1, orElse: () => 5)).toEqual(5);
     });
 
     test('Test okOr on Some', () {
@@ -286,25 +286,26 @@ void main() {
     test('Test andThen on Some', () {
       const x = Option.some(1);
 
-      expect(x.andThen((x) => Option.some(x + 1)))
+      expect(x.andThen((final x) => Option.some(x + 1)))
           .toEqual(const Option.some(2));
     });
 
     test('Test andThen on None', () {
       const x = Option<int>.none();
 
-      expect(x.andThen((x) => Option.some(x + 1))).toEqual(const Option.none());
+      expect(x.andThen((final x) => Option.some(x + 1)))
+          .toEqual(const Option.none());
     });
 
     test('Test where on Some', () {
       const x = Option.some(1);
 
-      expect(x.where((x) => x == 1)).toEqual(const Option.some(1));
+      expect(x.where((final x) => x == 1)).toEqual(const Option.some(1));
     });
 
     test('Test where on Some that fails filter', () {
       const x = Option.some(1);
-      final v = x.where((x) => x == 2);
+      final v = x.where((final x) => x == 2);
 
       expect(v).toEqual(const Option.none());
     });
@@ -312,7 +313,7 @@ void main() {
     test('Test where on None', () {
       const x = Option<int>.none();
 
-      expect(x.where((x) => x == 1)).toEqual(const Option.none());
+      expect(x.where((final x) => x == 1)).toEqual(const Option.none());
     });
 
     test('Test or on Some', () {
@@ -392,28 +393,28 @@ void main() {
     test('Test zipWith on Some', () {
       const x = Option.some(1);
 
-      expect(x.zipWith(const Option.some(2), (x, y) => x + y))
+      expect(x.zipWith(const Option.some(2), (final x, final y) => x + y))
           .toEqual(const Option.some(3));
     });
 
     test('Test zipWith on None', () {
       const x = Option<int>.none();
 
-      expect(x.zipWith(const Option.some(2), (x, y) => x + y))
+      expect(x.zipWith(const Option.some(2), (final x, final y) => x + y))
           .toEqual(const Option.none());
     });
 
     test('Test zipWith on Some with None', () {
       const x = Option.some(1);
 
-      expect(x.zipWith(const Option<int>.none(), (x, y) => x + y))
+      expect(x.zipWith(const Option<int>.none(), (final x, final y) => x + y))
           .toEqual(const Option.none());
     });
 
     test('Test zipWith on None with None', () {
       const x = Option<int>.none();
 
-      expect(x.zipWith(const Option<int>.none(), (x, y) => x + y))
+      expect(x.zipWith(const Option<int>.none(), (final x, final y) => x + y))
           .toEqual(const Option.none());
     });
 
@@ -574,7 +575,7 @@ void main() {
     });
 
     test('Test Iterable unwrapOrDefault on Some', () {
-      final x = Option.some(Iterable.generate(1, (i) => i));
+      final x = Option.some(Iterable.generate(1, (final i) => i));
 
       expect(x.unwrapOrDefault()).toEqual([0]);
     });
@@ -626,7 +627,7 @@ void main() {
         const Option.some(2)
       ];
 
-      expect(x.whereSomeAnd((x) => x == 1)).toEqual([1]);
+      expect(x.whereSomeAnd((final x) => x == 1)).toEqual([1]);
     });
 
     test('Test Iterable<Option<T>> mapWhereSome', () {
@@ -636,7 +637,7 @@ void main() {
         const Option.some(2)
       ];
 
-      expect(x.mapWhereSome((x) => x + 1)).toEqual([2, 3]);
+      expect(x.mapWhereSome((final x) => x + 1)).toEqual([2, 3]);
     });
 
     test('Test Iterable<Option<T>> collectOption', () {
@@ -668,7 +669,7 @@ void main() {
         [const Option.some(1), const Option<int>.none(), const Option.some(2)],
       );
 
-      await expect(x.whereSomeAnd((x) => x == 1).toList())
+      await expect(x.whereSomeAnd((final x) => x == 1).toList())
           .completion
           .toEqual([1]);
     });
@@ -678,7 +679,7 @@ void main() {
         [const Option.some(1), const Option<int>.none(), const Option.some(2)],
       );
 
-      await expect(x.mapWhereSome((x) => x + 1).toList())
+      await expect(x.mapWhereSome((final x) => x + 1).toList())
           .completion
           .toEqual([2, 3]);
     });
@@ -760,24 +761,31 @@ void main() {
     });
 
     test('Test guard on success', () {
-      expect(Result.guard(() => 1, onError: (e) => 'Error'))
+      expect(Result.guard(() => 1, onError: (final e) => 'Error'))
           .toEqual(const Ok(1));
     });
 
     test('Test guard on failure', () {
-      expect(Result.guard(() => throw Exception(), onError: (e) => 'Error'))
-          .toEqual(const Err('Error'));
+      expect(
+        Result.guard(
+          () => throw Exception(),
+          onError: (final e) => 'Error',
+        ),
+      ).toEqual(const Err('Error'));
     });
 
     test('Test guardAsync on success', () async {
       await expect(
-        Result.guardAsync(() => Future.value(1), onError: (e) => 'Error'),
+        Result.guardAsync(() => Future.value(1), onError: (final e) => 'Error'),
       ).completion.toEqual(const Ok(1));
     });
 
     test('Test guardAsync on failure', () async {
       await expect(
-        Result.guardAsync(() => throw Exception(), onError: (e) => 'Error'),
+        Result.guardAsync(
+          () => throw Exception(),
+          onError: (final e) => 'Error',
+        ),
       ).completion.toEqual(const Err('Error'));
     });
 
@@ -808,37 +816,37 @@ void main() {
     test('Test Result isOkAnd on Ok', () {
       const x = Result<int, String>.ok(1);
 
-      expect(x.isOkAnd((_) => true)).toEqual(true);
+      expect(x.isOkAnd((final _) => true)).toEqual(true);
     });
 
     test('Test Result isOkAnd on Err', () {
       const x = Result<int, String>.err('Error');
 
-      expect(x.isOkAnd((_) => true)).toEqual(false);
+      expect(x.isOkAnd((final _) => true)).toEqual(false);
     });
 
     test('Test Result isOkAnd on Ok with false predicate', () {
       const x = Result<int, String>.ok(1);
 
-      expect(x.isOkAnd((_) => false)).toEqual(false);
+      expect(x.isOkAnd((final _) => false)).toEqual(false);
     });
 
     test('Test Result isErrAnd on Ok', () {
       const x = Result<int, String>.ok(1);
 
-      expect(x.isErrAnd((_) => true)).toEqual(false);
+      expect(x.isErrAnd((final _) => true)).toEqual(false);
     });
 
     test('Test Result isErrAnd on Err', () {
       const x = Result<int, String>.err('Error');
 
-      expect(x.isErrAnd((_) => true)).toEqual(true);
+      expect(x.isErrAnd((final _) => true)).toEqual(true);
     });
 
     test('Test Result isErrAnd on Err with false predicate', () {
       const x = Result<int, String>.err('Error');
 
-      expect(x.isErrAnd((_) => false)).toEqual(false);
+      expect(x.isErrAnd((final _) => false)).toEqual(false);
     });
 
     test('Test ok on Ok', () {
@@ -868,49 +876,52 @@ void main() {
     test('Test map on Ok', () {
       const x = Result<int, String>.ok(1);
 
-      expect(x.map((x) => x + 1)).toEqual(const Result.ok(2));
+      expect(x.map((final x) => x + 1)).toEqual(const Result.ok(2));
     });
 
     test('Test map on Err', () {
       const x = Result<int, String>.err('Error');
 
-      expect(x.map((x) => x + 1)).toEqual(const Result.err('Error'));
+      expect(x.map((final x) => x + 1)).toEqual(const Result.err('Error'));
     });
 
     test('Test mapOr on Ok', () {
       const x = Result<int, String>.ok(1);
 
-      expect(x.mapOr(map: (x) => x + 1, or: 5)).toEqual(2);
+      expect(x.mapOr(map: (final x) => x + 1, or: 5)).toEqual(2);
     });
 
     test('Test mapOr on Err', () {
       const x = Result<int, String>.err('Error');
 
-      expect(x.mapOr(map: (x) => x + 1, or: 5)).toEqual(5);
+      expect(x.mapOr(map: (final x) => x + 1, or: 5)).toEqual(5);
     });
 
     test('Test mapOrElse on Ok', () {
       const x = Result<int, String>.ok(1);
 
-      expect(x.mapOrElse(map: (x) => x + 1, orElse: (_) => 5)).toEqual(2);
+      expect(x.mapOrElse(map: (final x) => x + 1, orElse: (final _) => 5))
+          .toEqual(2);
     });
 
     test('Test mapOrElse on Err', () {
       const x = Result<int, String>.err('Error');
 
-      expect(x.mapOrElse(map: (x) => x + 1, orElse: (_) => 5)).toEqual(5);
+      expect(x.mapOrElse(map: (final x) => x + 1, orElse: (final _) => 5))
+          .toEqual(5);
     });
 
     test('Test mapErr on Ok', () {
       const x = Result<int, String>.ok(1);
 
-      expect(x.mapErr((x) => '${x}1')).toEqual(const Result.ok(1));
+      expect(x.mapErr((final x) => '${x}1')).toEqual(const Result.ok(1));
     });
 
     test('Test mapErr on Err', () {
       const x = Result<int, String>.err('Error');
 
-      expect(x.mapErr((x) => '${x}1')).toEqual(const Result.err('Error1'));
+      expect(x.mapErr((final x) => '${x}1'))
+          .toEqual(const Result.err('Error1'));
     });
 
     test('Test inspect on Ok', () {
@@ -918,7 +929,7 @@ void main() {
       var y = 0;
 
       expect(
-        x.inspect((x) {
+        x.inspect((final x) {
           y = x;
         }),
       ).toEqual(x);
@@ -930,7 +941,7 @@ void main() {
       var y = 0;
 
       expect(
-        x.inspect((x) {
+        x.inspect((final x) {
           y = x;
         }),
       ).toEqual(x);
@@ -942,7 +953,7 @@ void main() {
       var y = '';
 
       expect(
-        x.inspectErr((x) {
+        x.inspectErr((final x) {
           y = x;
         }),
       ).toEqual(x);
@@ -954,7 +965,7 @@ void main() {
       var y = '';
 
       expect(
-        x.inspectErr((x) {
+        x.inspectErr((final x) {
           y = x;
         }),
       ).toEqual(x);
@@ -1024,13 +1035,13 @@ void main() {
     test('Test unwrapOrElse on Ok', () {
       const x = Result<int, String>.ok(1);
 
-      expect(x.unwrapOrElse((_) => 2)).toEqual(1);
+      expect(x.unwrapOrElse((final _) => 2)).toEqual(1);
     });
 
     test('Test unwrapOrElse on Err', () {
       const x = Result<int, String>.err('Error');
 
-      expect(x.unwrapOrElse((_) => 2)).toEqual(2);
+      expect(x.unwrapOrElse((final _) => 2)).toEqual(2);
     });
 
     test('Test unwrapErr on Ok', () {
@@ -1060,13 +1071,14 @@ void main() {
     test('Test andThen on Ok', () {
       const x = Result<int, String>.ok(1);
 
-      expect(x.andThen((x) => Result.ok(x + 1))).toEqual(const Result.ok(2));
+      expect(x.andThen((final x) => Result.ok(x + 1)))
+          .toEqual(const Result.ok(2));
     });
 
     test('Test andThen on Err', () {
       const x = Result<int, String>.err('Error');
 
-      expect(x.andThen((x) => Result.ok(x + 1)))
+      expect(x.andThen((final x) => Result.ok(x + 1)))
           .toEqual(const Result.err('Error'));
     });
 
@@ -1085,14 +1097,14 @@ void main() {
     test('Test orElse on Ok', () {
       const x = Result<int, String>.ok(1);
 
-      expect(x.orElse((_) => const Result<int, String>.ok(2)))
+      expect(x.orElse((final _) => const Result<int, String>.ok(2)))
           .toEqual(const Result.ok(1));
     });
 
     test('Test orElse on Err', () {
       const x = Result<int, String>.err('Error');
 
-      expect(x.orElse((_) => const Result<int, String>.ok(2)))
+      expect(x.orElse((final _) => const Result<int, String>.ok(2)))
           .toEqual(const Result.ok(2));
     });
 
@@ -1283,8 +1295,9 @@ void main() {
     });
 
     test('Test unwrapOrDefault on Iterable success', () {
-      final x =
-          Result<Iterable<int>, String>.ok(Iterable.generate(1, (i) => i));
+      final x = Result<Iterable<int>, String>.ok(
+        Iterable.generate(1, (final i) => i),
+      );
 
       expect(x.unwrapOrDefault()).toEqual([0]);
     });
@@ -1334,7 +1347,7 @@ void main() {
         const Result<int, String>.err('Error')
       ];
 
-      expect(x.whereOkAnd((x) => x == 1)).toEqual([1]);
+      expect(x.whereOkAnd((final x) => x == 1)).toEqual([1]);
     });
 
     test('Test Iterable<Result<T, E>> collectResult no errors', () {
@@ -1374,7 +1387,7 @@ void main() {
         ],
       );
 
-      await expect(x.whereOkAnd((x) => x == 1).toList())
+      await expect(x.whereOkAnd((final x) => x == 1).toList())
           .completion
           .toEqual([1]);
     });
@@ -1388,7 +1401,7 @@ void main() {
         ],
       );
 
-      await expect(x.whereOkAnd((x) => x == 2).toList())
+      await expect(x.whereOkAnd((final x) => x == 2).toList())
           .completion
           .toEqual([2]);
     });

@@ -65,15 +65,12 @@ abstract class _BoxFinalizableImpl<T> extends _BoxFinalizable<T> {
 
 /// @nodoc
 mixin _$_CountedBoxFinalizable<T> {
-  @freezed
   T get value => throw _privateConstructorUsedError;
-  @freezed
-  set value(T value) => throw _privateConstructorUsedError;
-  @freezed
   void Function(T) get onFinalize => throw _privateConstructorUsedError;
-  @freezed
-  Ptr<int> get count => throw _privateConstructorUsedError;
-  bool get isFinalized => throw _privateConstructorUsedError;
+  Ptr<int> get count =>
+      throw _privateConstructorUsedError; // ignore: prefer_final_parameters
+  bool get isFinalized =>
+      throw _privateConstructorUsedError; // ignore: prefer_final_parameters
   set isFinalized(bool value) => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
@@ -88,10 +85,7 @@ abstract class _$CountedBoxFinalizableCopyWith<T, $Res> {
       __$CountedBoxFinalizableCopyWithImpl<T, $Res, _CountedBoxFinalizable<T>>;
   @useResult
   $Res call(
-      {@freezed T value,
-      @freezed void Function(T) onFinalize,
-      @freezed Ptr<int> count,
-      bool isFinalized});
+      {T value, void Function(T) onFinalize, Ptr<int> count, bool isFinalized});
 }
 
 /// @nodoc
@@ -144,10 +138,7 @@ abstract class _$$_CountedBoxFinalizableImplCopyWith<T, $Res>
   @override
   @useResult
   $Res call(
-      {@freezed T value,
-      @freezed void Function(T) onFinalize,
-      @freezed Ptr<int> count,
-      bool isFinalized});
+      {T value, void Function(T) onFinalize, Ptr<int> count, bool isFinalized});
 }
 
 /// @nodoc
@@ -193,21 +184,19 @@ class __$$_CountedBoxFinalizableImplCopyWithImpl<T, $Res>
 
 class _$_CountedBoxFinalizableImpl<T> extends _CountedBoxFinalizableImpl<T> {
   _$_CountedBoxFinalizableImpl(
-      {@freezed required this.value,
-      @freezed required this.onFinalize,
-      @freezed required this.count,
+      {required this.value,
+      required this.onFinalize,
+      required this.count,
       required this.isFinalized})
       : super._();
 
   @override
-  @freezed
-  T value;
+  final T value;
   @override
-  @freezed
   final void Function(T) onFinalize;
   @override
-  @freezed
   final Ptr<int> count;
+// ignore: prefer_final_parameters
   @override
   bool isFinalized;
 
@@ -226,25 +215,20 @@ class _$_CountedBoxFinalizableImpl<T> extends _CountedBoxFinalizableImpl<T> {
 
 abstract class _CountedBoxFinalizableImpl<T> extends _CountedBoxFinalizable<T> {
   factory _CountedBoxFinalizableImpl(
-      {@freezed required T value,
-      @freezed required final void Function(T) onFinalize,
-      @freezed required final Ptr<int> count,
+      {required final T value,
+      required final void Function(T) onFinalize,
+      required final Ptr<int> count,
       required bool isFinalized}) = _$_CountedBoxFinalizableImpl<T>;
   _CountedBoxFinalizableImpl._() : super._();
 
   @override
-  @freezed
   T get value;
-  @freezed
-  set value(T value);
   @override
-  @freezed
   void Function(T) get onFinalize;
   @override
-  @freezed
   Ptr<int> get count;
-  @override
-  bool get isFinalized;
+  @override // ignore: prefer_final_parameters
+  bool get isFinalized; // ignore: prefer_final_parameters
   set isFinalized(bool value);
   @override
   @JsonKey(ignore: true)

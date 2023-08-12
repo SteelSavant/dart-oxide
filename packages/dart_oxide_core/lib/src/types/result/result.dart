@@ -1,8 +1,9 @@
 import 'dart:async';
 
-import 'package:dart_oxide_core/src/types/option/option.dart';
-import 'package:dart_oxide_core/src/types/single_element_iterator.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+
+import '../option/option.dart';
+import '../single_element_iterator.dart';
 
 part 'result.freezed.dart';
 
@@ -13,17 +14,17 @@ sealed class Result<R, E> with _$Result<R, E> {
   const Result._();
 
   /// Creates a [Result] that contains a value.
-  const factory Result.ok(R value) = Ok<R, E>;
+  const factory Result.ok(final R value) = Ok<R, E>;
 
   /// Creates a [Result] that contains an error.
-  const factory Result.err(E error) = Err<R, E>;
+  const factory Result.err(final E error) = Err<R, E>;
 
   /// Executes the given [fn] and returns [Ok] if no exception is thrown,
   /// otherwise returns [Err] with the thrown exception mapped to [E] by [onError].
   /// Both [fn] and [onError] must be synchronous.
   static Result<R, E> guard<R, E, X extends Object>(
-    R Function() fn, {
-    required E Function(X) onError,
+    final R Function() fn, {
+    required final E Function(X) onError,
   }) {
     try {
       return Result.ok(fn());
@@ -36,8 +37,8 @@ sealed class Result<R, E> with _$Result<R, E> {
   /// otherwise returns [Err] with the thrown exception mapped to [E] by [onError].
   /// Any of [fn] and [onError] may be asynchronous.
   static Future<Result<R, E>> guardAsync<R, E, X extends Object>(
-    FutureOr<R> Function() fn, {
-    required FutureOr<E> Function(X) onError,
+    final FutureOr<R> Function() fn, {
+    required final FutureOr<E> Function(X) onError,
   }) async {
     try {
       return Result<R, E>.ok(await fn());
@@ -46,7 +47,7 @@ sealed class Result<R, E> with _$Result<R, E> {
     }
   }
 
-  /// Returns [true] if the result is [Ok]
+  /// Returns true if the result is [Ok]
   ///
   /// # Examples
   ///
@@ -61,7 +62,7 @@ sealed class Result<R, E> with _$Result<R, E> {
   @pragma('dart2js:tryInline')
   bool get isOk => this is Ok<R, E>;
 
-  /// Returns [true] if the result is [Err]
+  /// Returns true if the result is [Err]
   ///
   /// # Examples
   ///
@@ -76,7 +77,7 @@ sealed class Result<R, E> with _$Result<R, E> {
   @pragma('dart2js:tryInline')
   bool get isErr => this is Err<R, E>;
 
-  /// Returns [true] if the result is [Ok] and the value inside matches the given [predicate].
+  /// Returns true if the result is [Ok] and the value inside matches the given [predicate].
   ///
   /// # Examples
   ///
@@ -92,12 +93,12 @@ sealed class Result<R, E> with _$Result<R, E> {
   /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
-  bool isOkAnd(bool Function(R) predicate) => switch (this) {
+  bool isOkAnd(final bool Function(R) predicate) => switch (this) {
         Ok(:final value) => predicate(value),
         Err() => false,
       };
 
-  /// Returns [true] if the result is [Err] and the error inside matches the given [predicate].
+  /// Returns true if the result is [Err] and the error inside matches the given [predicate].
   ///
   /// # Examples
   ///
@@ -113,7 +114,7 @@ sealed class Result<R, E> with _$Result<R, E> {
   /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
-  bool isErrAnd(bool Function(E) predicate) => switch (this) {
+  bool isErrAnd(final bool Function(E) predicate) => switch (this) {
         Ok() => false,
         Err(:final error) => predicate(error),
       };
@@ -170,7 +171,7 @@ sealed class Result<R, E> with _$Result<R, E> {
   /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
-  Result<R2, E> map<R2>(R2 Function(R) fn) => switch (this) {
+  Result<R2, E> map<R2>(final R2 Function(R) fn) => switch (this) {
         Ok(:final value) => Result.ok(fn(value)),
         Err(:final error) => Result.err(error),
       };
@@ -193,7 +194,8 @@ sealed class Result<R, E> with _$Result<R, E> {
   /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
-  R2 mapOr<R2>({required R2 Function(R) map, required R2 or}) => switch (this) {
+  R2 mapOr<R2>({required final R2 Function(R) map, required final R2 or}) =>
+      switch (this) {
         Ok(:final value) => map(value),
         Err() => or,
       };
@@ -216,8 +218,8 @@ sealed class Result<R, E> with _$Result<R, E> {
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   R2 mapOrElse<R2>({
-    required R2 Function(R) map,
-    required R2 Function(E) orElse,
+    required final R2 Function(R) map,
+    required final R2 Function(E) orElse,
   }) =>
       switch (this) {
         Ok(:final value) => map(value),
@@ -241,12 +243,12 @@ sealed class Result<R, E> with _$Result<R, E> {
   /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
-  Result<R, E2> mapErr<E2>(E2 Function(E) fn) => switch (this) {
+  Result<R, E2> mapErr<E2>(final E2 Function(E) fn) => switch (this) {
         Ok(:final value) => Result.ok(value),
         Err(:final error) => Result.err(fn(error)),
       };
 
-  /// Calls [fn] on the contained value if the result is [Ok], and returns [this]
+  /// Calls [fn] on the contained value if the result is [Ok], and returns this
   ///
   /// # Examples
   ///
@@ -259,18 +261,16 @@ sealed class Result<R, E> with _$Result<R, E> {
   /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
-  Result<R, E> inspect(void Function(R) fn) {
-    switch (this) {
-      case Ok(:final value):
-        fn(value);
-        return this;
-
-      case Err():
-        return this;
+  Result<R, E> inspect(final void Function(R) fn) {
+    if (this case Ok(:final value)) {
+      fn(value);
     }
+
+    // ignore: avoid_returning_this
+    return this;
   }
 
-  /// Calls [fn] on the contained error if the result is [Err], and returns [this].
+  /// Calls [fn] on the contained error if the result is [Err], and returns this.
   ///
   /// # Examples
   ///
@@ -283,14 +283,13 @@ sealed class Result<R, E> with _$Result<R, E> {
   /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
-  Result<R, E> inspectErr(void Function(E) fn) {
-    switch (this) {
-      case Ok():
-        return this;
-      case Err(:final error):
-        fn(error);
-        return this;
+  Result<R, E> inspectErr(final void Function(E) fn) {
+    if (this case Err(:final error)) {
+      fn(error);
     }
+
+    // ignore: avoid_returning_this
+    return this;
   }
 
   /// Returns an iterator over the possibly contained value.
@@ -314,7 +313,7 @@ sealed class Result<R, E> with _$Result<R, E> {
   /// Because this function may throw, its use is generally discouraged.
   /// Instead, prefer to use pattern matching and handle the [Err] case explicitly,
   /// or call [unwrapOr] or [unwrapOrElse]. Some primitive types
-  /// also provide an [unwrapOrDefault] extension method to provide a default value.
+  /// also provide an `unwrapOrDefault` extension method to provide a default value.
   ///
   /// # Throws
   ///
@@ -334,7 +333,7 @@ sealed class Result<R, E> with _$Result<R, E> {
   /// you _expect_ the [Result] should be [Ok].
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
-  R expect(String message) => switch (this) {
+  R expect(final String message) => switch (this) {
         Ok(:final value) => value,
         Err() => throw StateError(message),
       };
@@ -356,7 +355,7 @@ sealed class Result<R, E> with _$Result<R, E> {
   /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
-  E expectErr(String message) => switch (this) {
+  E expectErr(final String message) => switch (this) {
         Ok() => throw StateError(message),
         Err(:final error) => error,
       };
@@ -366,7 +365,7 @@ sealed class Result<R, E> with _$Result<R, E> {
   /// Because this function may throw, its use is generally discouraged.
   /// Instead, prefer to use pattern matching and handle the [Err] case explicitly,
   /// or call [unwrapOr] or [unwrapOrElse]. Some primitive types also
-  /// provide an [unwrapOrDefault] extension method to provide a default value.
+  /// provide an `unwrapOrDefault` extension method to provide a default value.
   ///
   /// # Throws
   ///
@@ -405,7 +404,7 @@ sealed class Result<R, E> with _$Result<R, E> {
   /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
-  R unwrapOr(R or) => switch (this) {
+  R unwrapOr(final R or) => switch (this) {
         Ok(:final value) => value,
         Err() => or,
       };
@@ -423,7 +422,7 @@ sealed class Result<R, E> with _$Result<R, E> {
   /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
-  R unwrapOrElse(R Function(E) orElse) => switch (this) {
+  R unwrapOrElse(final R Function(E) orElse) => switch (this) {
         Ok(:final value) => value,
         Err(:final error) => orElse(error),
       };
@@ -450,7 +449,7 @@ sealed class Result<R, E> with _$Result<R, E> {
         Err(:final error) => error,
       };
 
-  /// Returns [res] if the result is [Ok], otherwise returns the [Err] value of [this].
+  /// Returns [res] if the result is [Ok], otherwise returns the [Err] value of this.
   ///
   /// Arguments passed to `and` are eagerly evaluated; if you are passing the
   /// result of a function call, it is recommended to use [andThen], which is
@@ -471,12 +470,12 @@ sealed class Result<R, E> with _$Result<R, E> {
   /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
-  Result<U, E> and<U>(Result<U, E> res) => switch (this) {
+  Result<U, E> and<U>(final Result<U, E> res) => switch (this) {
         Ok() => res,
         Err(:final error) => Result.err(error),
       };
 
-  /// Calls [fn] if the result is [Ok], otherwise returns the [Err] value of [this].
+  /// Calls [fn] if the result is [Ok], otherwise returns the [Err] value of this.
   ///
   /// This function can be used for control flow based on [Result] values.
   /// Often used to chain fallible operations that may return [Err].
@@ -490,12 +489,12 @@ sealed class Result<R, E> with _$Result<R, E> {
   /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
-  Result<U, E> andThen<U>(Result<U, E> Function(R) fn) => switch (this) {
+  Result<U, E> andThen<U>(final Result<U, E> Function(R) fn) => switch (this) {
         Ok(:final value) => fn(value),
         Err(:final error) => Result.err(error)
       };
 
-  /// Returns [res] if the result is [Err], otherwise returns the [Ok] value of [this].
+  /// Returns [res] if the result is [Err], otherwise returns the [Ok] value of this.
   ///
   /// Arguments passed to `or` are eagerly evaluated; if you are passing the
   /// result of a function call, it is recommended to use [orElse], which is
@@ -516,12 +515,12 @@ sealed class Result<R, E> with _$Result<R, E> {
   /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
-  Result<R, F> or<F>(Result<R, F> err) => switch (this) {
+  Result<R, F> or<F>(final Result<R, F> res) => switch (this) {
         Ok(:final value) => Result.ok(value),
-        Err() => err,
+        Err() => res,
       };
 
-  /// Calls [fn] if the result is [Err], otherwise returns the [Ok] value of [this].
+  /// Calls [fn] if the result is [Err], otherwise returns the [Ok] value of this.
   ///
   /// This function can be used for control flow based on [Result] values.
   ///
@@ -538,7 +537,7 @@ sealed class Result<R, E> with _$Result<R, E> {
   /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
-  Result<R, F> orElse<F>(Result<R, F> Function(E) fn) => switch (this) {
+  Result<R, F> orElse<F>(final Result<R, F> Function(E) fn) => switch (this) {
         Ok(:final value) => Result.ok(value),
         Err(:final error) => fn(error),
       };

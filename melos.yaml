@@ -6,7 +6,7 @@ ide:
     enabled: false
 
 scripts:
-  upgrade:
+  pub_upgrade:
     run: dart pub upgrade 
     exec:
       orderDependents: true

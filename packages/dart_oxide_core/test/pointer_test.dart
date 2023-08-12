@@ -78,7 +78,7 @@ void main() {
       var x = 1;
       final disposable = Box(
         x,
-        onDispose: (int d) {
+        onDispose: (final int d) {
           x += d;
           return ();
         },
@@ -121,6 +121,7 @@ void main() {
             includeDisposeTime: includeDisposeTime,
             includeTrace: includeTrace,
           );
+          // ignore: avoid_catching_errors
         } on StateError catch (e) {
           expect(e.message).toContain(msg);
           if (includeDisposeTime) {
@@ -156,7 +157,7 @@ void main() {
 
     test('Test Rc does not dispose value if cloned is live', () {
       var x = 0;
-      final rc = Rc(1, onDispose: (v) => (x += v).toUnit());
+      final rc = Rc(1, onDispose: (final v) => (x += v).toUnit());
       final rc2 = rc.clone();
       rc.dispose();
       expect(rc.unwrap).throws.isStateError();
@@ -166,7 +167,7 @@ void main() {
 
     test('Test Rc does not dispose value if original is live', () {
       var x = 0;
-      final rc = Rc(1, onDispose: (v) => (x += v).toUnit());
+      final rc = Rc(1, onDispose: (final v) => (x += v).toUnit());
       final rc2 = rc.clone()..dispose();
       expect(rc.unwrap()).toEqual(1);
       expect(rc2.unwrap).throws.isStateError();
@@ -175,7 +176,7 @@ void main() {
 
     test('Test Rc disposes value if all Rcs are disposed', () {
       var x = 0;
-      final rc = Rc(1, onDispose: (v) => (x += v).toUnit());
+      final rc = Rc(1, onDispose: (final v) => (x += v).toUnit());
       final rc2 = rc.clone();
       rc.dispose();
       rc2.dispose();
@@ -271,7 +272,7 @@ void main() {
     test('Test using', () {
       final ptr = Ptr(1);
       final box = Box.fromValue(ptr);
-      using(box, (box) {
+      using(box, (final box) {
         box.unwrap().value = 2;
       });
 
@@ -283,9 +284,9 @@ void main() {
       final ptr = Ptr(1);
       final box = Box(
         ptr,
-        onDispose: (p0) => Future.value(()),
+        onDispose: (final p0) => Future.value(()),
       );
-      await usingAsync(box, (box) async {
+      await usingAsync(box, (final box) async {
         box.unwrap().value = 2;
       });
 

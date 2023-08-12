@@ -1,6 +1,7 @@
-import 'package:dart_oxide_core/src/types/result/result.dart';
-import 'package:dart_oxide_core/src/types/single_element_iterator.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+
+import '../result/result.dart';
+import '../single_element_iterator.dart';
 
 part 'option.freezed.dart';
 
@@ -54,7 +55,7 @@ part 'option.freezed.dart';
 ///
 /// ## Querying the variant
 ///
-/// The [isSome] and [isNone] methods return [true] if the [Option]
+/// The [isSome] and [isNone] methods return true if the [Option]
 /// is [Some] or [None], respectively.
 ///
 ///  ## Extracting the contained value
@@ -72,9 +73,9 @@ part 'option.freezed.dart';
 ///
 /// These Methods transform [Option] to [Result]:
 ///
-/// * [okOr] transforms [Option] to [Result] by mapping [Some] to [Ok] and [None] to [Err(err)] using the provided default [err] value.
-/// * [okOrElse] transforms [Option] to [Result] by mapping [Some] to [Ok] and [None] to [Err(err())] using the provided default [err] function.
-/// * [transpose] transposes an [Option] of a [Result] into a [Result] of an [Option].
+/// * [okOr] transforms [Option] to [Result] by mapping [Some] to [Ok] and [None] to [Err(err)] using the provided default err value.
+/// * [okOrElse] transforms [Option] to [Result] by mapping [Some] to [Ok] and [None] to [Err(err())] using the provided default err function.
+/// * [IOptionResult.transpose()] transposes an [Option] of a [Result] into a [Result] of an [Option].
 ///
 // TODO::finish method overview
 @Freezed(copyWith: false)
@@ -93,7 +94,7 @@ sealed class Option<T> with _$Option<T> {
   /// assert(x == y);
   /// ```
   @literal
-  const factory Option.some(T value) = Some<T>;
+  const factory Option.some(final T value) = Some<T>;
 
   /// Creates an [Option] that does not contain a value.
   /// Equivalent to invoking the [None] constructor directly.
@@ -140,10 +141,10 @@ sealed class Option<T> with _$Option<T> {
   /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
-  factory Option.fromNullable(T? value) =>
+  factory Option.fromNullable(final T? value) =>
       value == null ? Option<T>.none() : Option<T>.some(value);
 
-  /// Returns [true] if the option is a [Some] value.
+  /// Returns true if the option is a [Some] value.
   ///
   /// # Examples
   ///
@@ -158,7 +159,7 @@ sealed class Option<T> with _$Option<T> {
   @pragma('dart2js:tryInline')
   bool get isSome => this is Some<T>;
 
-  /// Returns [true] if the option is a [None] value.
+  /// Returns true if the option is a [None] value.
   ///
   /// # Examples
   /// ```
@@ -186,7 +187,7 @@ sealed class Option<T> with _$Option<T> {
   /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
-  bool isSomeAnd(bool Function(T) predicate) => switch (this) {
+  bool isSomeAnd(final bool Function(T) predicate) => switch (this) {
         Some(:final value) => predicate(value),
         None() => false,
       };
@@ -196,7 +197,7 @@ sealed class Option<T> with _$Option<T> {
   /// Because this funciton may throw, its use is generally discouraged.
   /// Instead, prefer to use pattern matching and handle the [None] case explicitly,
   /// or call [unwrapOr] or [unwrapOrElse] to provide a default value. Some primitive types
-  /// also provide an [unwrapOrDefault] extension method to provide a default value.
+  /// also provide an `unwrapOrDefault` extension method to provide a default value.
   ///
   /// # Throws
   ///
@@ -217,7 +218,7 @@ sealed class Option<T> with _$Option<T> {
   /// _expect_ the [Option] should be [Some].
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
-  T expect(String message) => switch (this) {
+  T expect(final String message) => switch (this) {
         Some(:final value) => value,
         None() => throw StateError(message),
       };
@@ -227,7 +228,7 @@ sealed class Option<T> with _$Option<T> {
   /// Because this funciton may throw, its use is generally discouraged.
   /// Instead, prefer to use pattern matching and handle the [None] case explicitly,
   /// or call [unwrapOr] or [unwrapOrElse] to provide a default value. Some primitive types
-  /// also provide an [unwrapOrDefault] extension method to provide a default value.
+  /// also provide an `unwrapOrDefault` extension method to provide a default value.
   ///
   /// # Throws
   ///
@@ -266,7 +267,7 @@ sealed class Option<T> with _$Option<T> {
   /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
-  T unwrapOr(T defaultValue) => switch (this) {
+  T unwrapOr(final T defaultValue) => switch (this) {
         Some(:final value) => value,
         None() => defaultValue,
       };
@@ -286,7 +287,7 @@ sealed class Option<T> with _$Option<T> {
   /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
-  T unwrapOrElse(T Function() fn) => switch (this) {
+  T unwrapOrElse(final T Function() fn) => switch (this) {
         Some(:final value) => value,
         None() => fn(),
       };
@@ -304,12 +305,12 @@ sealed class Option<T> with _$Option<T> {
   /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
-  Option<R> map<R>(R Function(T) fn) => switch (this) {
+  Option<R> map<R>(final R Function(T) fn) => switch (this) {
         Some(:final value) => Option.some(fn(value)),
         None() => Option<R>.none(),
       };
 
-  /// Calls the provided [fn] with [value] if the [Option] is [Some], and returns the [Option] itself.
+  /// Calls the provided [fn] with the stored value if the [Option] is [Some], and returns the [Option] itself.
   ///
   /// # Examples
   ///
@@ -322,14 +323,12 @@ sealed class Option<T> with _$Option<T> {
   /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
-  Option<T> inspect(void Function(T) fn) {
-    switch (this) {
-      case Some(:final value):
-        fn(value);
-      default:
-        break;
+  Option<T> inspect(final void Function(T) fn) {
+    if (this case Some(:final value)) {
+      fn(value);
     }
 
+    // ignore: avoid_returning_this
     return this;
   }
 
@@ -352,7 +351,8 @@ sealed class Option<T> with _$Option<T> {
   /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
-  R mapOr<R>({required R Function(T) map, required R or}) => switch (this) {
+  R mapOr<R>({required final R Function(T) map, required final R or}) =>
+      switch (this) {
         Some(:final value) => map(value),
         None() => or,
       };
@@ -373,8 +373,8 @@ sealed class Option<T> with _$Option<T> {
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   R mapOrElse<R>({
-    required R Function(T) map,
-    required R Function() orElse,
+    required final R Function(T) map,
+    required final R Function() orElse,
   }) =>
       switch (this) {
         Some(:final value) => map(value),
@@ -399,7 +399,7 @@ sealed class Option<T> with _$Option<T> {
   /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
-  Result<T, E> okOr<E>(E error) => switch (this) {
+  Result<T, E> okOr<E>(final E error) => switch (this) {
         Some(:final value) => Result.ok(value),
         None() => Result.err(error),
       };
@@ -418,7 +418,7 @@ sealed class Option<T> with _$Option<T> {
   /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
-  Result<T, E> okOrElse<E>(E Function() fn) => switch (this) {
+  Result<T, E> okOrElse<E>(final E Function() fn) => switch (this) {
         Some(:final value) => Result.ok(value),
         None() => Result.err(fn()),
       };
@@ -441,7 +441,7 @@ sealed class Option<T> with _$Option<T> {
 
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
-  Option<R> and<R>(Option<R> other) => switch (this) {
+  Option<R> and<R>(final Option<R> other) => switch (this) {
         Some() => other,
         None() => Option<R>.none(),
       };
@@ -450,7 +450,7 @@ sealed class Option<T> with _$Option<T> {
   /// wrapped value and returns the result.
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
-  Option<R> andThen<R>(Option<R> Function(T) fn) => switch (this) {
+  Option<R> andThen<R>(final Option<R> Function(T) fn) => switch (this) {
         Some(:final value) => fn(value),
         None() => Option<R>.none(),
       };
@@ -475,7 +475,7 @@ sealed class Option<T> with _$Option<T> {
   /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
-  Option<T> where(bool Function(T) predicate) => switch (this) {
+  Option<T> where(final bool Function(T) predicate) => switch (this) {
         Some(:final value) when predicate(value) => this,
         _ => Option<T>.none(),
       };
@@ -507,7 +507,7 @@ sealed class Option<T> with _$Option<T> {
   /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
-  Option<T> or(Option<T> other) => switch (this) {
+  Option<T> or(final Option<T> other) => switch (this) {
         Some() => this,
         None() => other,
       };
@@ -527,12 +527,12 @@ sealed class Option<T> with _$Option<T> {
   /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
-  Option<T> orElse(Option<T> Function() fn) => switch (this) {
+  Option<T> orElse(final Option<T> Function() fn) => switch (this) {
         Some() => this,
         None() => fn(),
       };
 
-  /// Returns [Some] if exactly one of [this], [other] is [Some], otherwise returns [None].
+  /// Returns [Some] if exactly one of this, [other] is [Some], otherwise returns [None].
   ///
   /// # Examples
   ///
@@ -555,15 +555,15 @@ sealed class Option<T> with _$Option<T> {
   /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
-  Option<T> xor(Option<T> other) => switch ((this, other)) {
+  Option<T> xor(final Option<T> other) => switch ((this, other)) {
         (Some(), None()) => this,
         (None(), Some()) => other,
         _ => Option<T>.none(),
       };
 
-  /// Zips [this] with another [Option].
+  /// Zips this with another [Option].
   ///
-  /// If [this] is [Some(s)] and [other] is [Some(o)], returns [Some((s, o))].
+  /// If this is [Some(s)] and [other] is [Some(o)], returns [Some((s, o))].
   /// Otherwise, returns [None].
   ///
   /// # Examples
@@ -578,16 +578,16 @@ sealed class Option<T> with _$Option<T> {
   /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
-  Option<(T, R)> zip<R>(Option<R> other) => switch (this) {
-        Some(:final value) => other.map((other) => (value, other)),
+  Option<(T, R)> zip<R>(final Option<R> other) => switch (this) {
+        Some(:final value) => other.map((final other) => (value, other)),
         // ignore: prefer_const_constructors, fails to compile if const
         // ignore: non_const_call_to_literal_constructor, fails to compile if const
         None() => Option<(T, R)>.none(),
       };
 
-  /// Zips [this] and another [Option] with function [fn].
+  /// Zips this and another [Option] with function [fn].
   ///
-  /// If [this] is [Some(s)] and [other] is [Some(o)], returns [Some(fn(s, o))].
+  /// If this is [Some(s)] and [other] is [Some(o)], returns [Some(fn(s, o))].
   /// Otherwise, returns [None].
   ///
   /// # Examples
@@ -607,7 +607,7 @@ sealed class Option<T> with _$Option<T> {
   /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
-  Option<R> zipWith<U, R>(Option<U> other, R Function(T, U) fn) =>
+  Option<R> zipWith<U, R>(final Option<U> other, final R Function(T, U) fn) =>
       switch ((this, other)) {
         (Some(:final value), Some(value: final other)) =>
           Option.some(fn(value, other)),
@@ -710,7 +710,7 @@ extension OptionOptionExt<T> on Option<Option<T>> {
 }
 
 extension OptionBoolExt on Option<bool> {
-  /// Returns the contained [Some] value or a default of [false].
+  /// Returns the contained [Some] value or a default of false.
   ///
   /// # Example
   /// ```
@@ -726,7 +726,7 @@ extension OptionBoolExt on Option<bool> {
 }
 
 extension OptionIntExt on Option<int> {
-  /// Returns the contained [Some] value or a default of [int.zero].
+  /// Returns the contained [Some] value or a default of 0.
   ///
   /// # Example
   /// ```
@@ -742,7 +742,7 @@ extension OptionIntExt on Option<int> {
 }
 
 extension OptionDoubleExt on Option<double> {
-  /// Returns the contained [Some] value or a default of [double.zero].
+  /// Returns the contained [Some] value or a default of 0.0.
   ///
   /// # Example
   /// ```
@@ -758,7 +758,7 @@ extension OptionDoubleExt on Option<double> {
 }
 
 extension OptionNumExt on Option<num> {
-  /// Returns the contained [Some] value or a default of [num.zero].
+  /// Returns the contained [Some] value or a default of 0.
   ///
   /// # Example
   /// ```
@@ -774,7 +774,7 @@ extension OptionNumExt on Option<num> {
 }
 
 extension OptionStringExt on Option<String> {
-  /// Returns the contained [Some] value or a default of [String.empty].
+  /// Returns the contained [Some] value or a default of [String.empty()].
   ///
   /// # Example
   /// ```
@@ -806,7 +806,7 @@ extension OptionListExt<T> on Option<List<T>> {
 }
 
 extension OptionMapExt<K, V> on Option<Map<K, V>> {
-  /// Returns the contained [Some] value or a default of [Map.empty].
+  /// Returns the contained [Some] value or a default of [<K, V>].
   ///
   /// # Example
   /// ```
@@ -822,7 +822,7 @@ extension OptionMapExt<K, V> on Option<Map<K, V>> {
 }
 
 extension OptionSetExt<T> on Option<Set<T>> {
-  /// Returns the contained [Some] value or a default of [Set.empty].
+  /// Returns the contained [Some] value or a default of [<T>{}].
   ///
   /// # Example
   /// ```
