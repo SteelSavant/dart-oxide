@@ -24,6 +24,8 @@ scripts:
 
   test_internal:
     exec: dart pub global run full_coverage && flutter test --coverage --branch-coverage
+    packageFilters:
+      ignore: dart_oxide_lints
   test: 
     run: melos run test_internal && dart scripts/combine_coverage.dart
 

@@ -13,12 +13,12 @@ void main() {
   final lconvFiles = topLevel
       .listSync(recursive: true)
       .where(
-        (e) =>
+        (final e) =>
             e.path.endsWith('lcov.info') &&
             e.uri.pathSegments.length >
                 2, // dart file path comparisons are jank as hell, so we cheat a little instead
       )
-      .map((e) => File(e.path));
+      .map((final e) => File(e.path));
 
   for (final file in lconvFiles) {
     print('Found ${file.path}');
@@ -27,17 +27,17 @@ void main() {
   final lconvContents = Lcov.parse(
     lconvFiles
         .map(
-          (e) => (
+          (final e) => (
             e.path.replaceAll('coverage\\lcov.info', ''),
             e.readAsStringSync()
           ),
         )
-        .map((e) => e.$2.replaceAll('SF:', 'SF:${e.$1}'))
+        .map((final e) => e.$2.replaceAll('SF:', 'SF:${e.$1}'))
         .join('\n'),
   )
-    ..removeSourceWhere((e) => e.endsWith('_test.dart'))
-    ..removeSourceWhere((p0) => p0.endsWith('.g.dart'))
-    ..removeSourceWhere((p0) => p0.endsWith('.freezed.dart'));
+    ..removeSourceWhere((final e) => e.endsWith('_test.dart'))
+    ..removeSourceWhere((final p0) => p0.endsWith('.g.dart'))
+    ..removeSourceWhere((final p0) => p0.endsWith('.freezed.dart'));
 
   print('Writing to ${outputFile.absolute.path}');
 
@@ -46,20 +46,24 @@ void main() {
     ..writeAsStringSync(lconvContents.toString());
 
   if (Platform.isWindows) {
-    print('Generating HTML report');
-    Directory('coverage/html').createSync(recursive: true);
-    final result = Process.runSync(
-      'perl',
-      [
-        'C:\\ProgramData\\chocolatey\\lib\\lcov\\tools\\bin\\genhtml',
-        'coverage/lcov.info',
-        '-o',
-        'coverage/html',
-        '--branch-coverage',
-      ],
-    );
+    try {
+      print('Generating HTML report');
+      Directory('coverage/html').createSync(recursive: true);
+      final result = Process.runSync(
+        'perl',
+        [
+          'C:\\ProgramData\\chocolatey\\lib\\lcov\\tools\\bin\\genhtml',
+          'coverage/lcov.info',
+          '-o',
+          'coverage/html',
+          '--branch-coverage',
+        ],
+      );
 
-    print(result.stdout);
+      print(result.stdout);
+    } on Exception catch (e) {
+      print(e);
+    }
   }
 
   // TODO::genhtml for mac/linux
@@ -70,7 +74,7 @@ class Lcov {
 
   Lcov(this.records);
 
-  factory Lcov.parse(String source) {
+  factory Lcov.parse(final String source) {
     final lines = source.split('\n');
     final records = <LcovRecord>[];
 
@@ -100,11 +104,11 @@ class Lcov {
     return Lcov(records);
   }
 
-  void removeSourceWhere(bool Function(String) predicate) {
-    records.removeWhere((e) => predicate(e.sourceFile));
+  void removeSourceWhere(final bool Function(String) predicate) {
+    records.removeWhere((final e) => predicate(e.sourceFile));
   }
 
-  void write(StringBuffer buffer) => buffer.writeAll(records, '\n');
+  void write(final StringBuffer buffer) => buffer.writeAll(records, '\n');
 
   @override
   String toString() {

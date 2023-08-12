@@ -73,6 +73,21 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.6.0+1"
+  dart_oxide_lints:
+    dependency: "direct dev"
+    description:
+      path: "packages/dart_oxide_lints"
+      relative: true
+    source: path
+    version: "1.0.0"
+  extra_pedantic:
+    dependency: transitive
+    description:
+      name: extra_pedantic
+      sha256: de6407d96ae98e15168bc18111b4b8735f70ac089a860b6377be25529df07ca3
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.0.0"
   file:
     dependency: transitive
     description:
@@ -129,14 +144,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.8.1"
-  lints:
-    dependency: "direct dev"
-    description:
-      name: lints
-      sha256: "0a217c6c989d21039f1498c3ed9f3ed71b354e69873f13a8dfc3c9fe76f1b452"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.1.1"
   matcher:
     dependency: transitive
     description:

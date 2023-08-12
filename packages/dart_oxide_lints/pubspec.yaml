@@ -1,0 +1,17 @@
+name: dart_oxide_lints
+version: 1.0.0
+description: >
+  Dart lint rules enforcing stricter type checks and other best practices.
+
+topics:
+  - analysis
+  - lints
+
+environment:
+  sdk: ^3.0.0
+
+# NOTE: Code is not allowed in this package - do not add dependencies.
+# dependencies:
+
+dependencies:
+  extra_pedantic: ^4.0.0

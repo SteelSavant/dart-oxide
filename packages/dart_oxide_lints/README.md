@@ -1,3 +1,24 @@
+A strict set of lints to be used alongside other dart-oxide packages.
+Modified from [extra_pedantic](https://github.com/modulovalue/extra_pedantic/tree/master).
+
+# Features
+
+- As strong of type checks as dart will allow
+- Lints to encourage better code style
+- Automatically ignores common generated files (*.g.dart, *.freezed.dart)
+- Lints exposing potentially incorrect behavior configured to errors instead of warnings
+
+# Usage
+
+To use the configured lints, include this package's configuration in your `analysis_options.yaml`
+
+```yaml
+include: package:dart_oxide_lints/analysis_options.yaml
+```
+
+The `include` function in `analysis_options.yaml` does not seem to apply values in the `exclude` or `errors` sections. To use the configured warning/error levels and ignore common generated files, copy the sections from the source of the `analysis_options.yaml` in this repository into your `analysis_options.yaml`.
+
+```
 include: package:dart_oxide_lints/analysis_options.yaml
 analyzer:
   exclude:
@@ -65,5 +86,6 @@ analyzer:
     # ignore
     todo: ignore
     invalid_annotation_target: ignore # required by freezed
+```
 
-    
+
