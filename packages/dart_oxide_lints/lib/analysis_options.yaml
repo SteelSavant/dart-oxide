@@ -97,6 +97,7 @@ linter:
     prefer_single_quotes: true # Less verbose, maintains consistency.
     require_trailing_commas: true # Maintains formatting consistency.
     sort_child_properties_last: true # Recommended, Maintains formatting consistency.
+    sort_unnamed_constructors_first: false # Too pedantic.
     type_literal_in_constant_pattern: true # Avoids unintended behavior due to syntax ambiguity.
     unnecessary_breaks: True # Less verbose.
     unnecessary_null_aware_operator_on_extension_on_nullable: true # Avoids unintended behavior.
