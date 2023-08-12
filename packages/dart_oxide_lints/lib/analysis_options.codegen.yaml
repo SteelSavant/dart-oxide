@@ -1,0 +1,9 @@
+# Unreleased lints are commented out in this file to avoid warnings.
+
+include: analysis_options.yaml
+analyzer:
+  exclude:
+    - '**/*.freezed.dart'
+    - '**/*.g.dart'
+  errors:
+    invalid_annotation_target: ignore # required by freezed

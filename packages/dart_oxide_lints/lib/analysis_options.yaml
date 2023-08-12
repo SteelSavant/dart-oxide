@@ -2,9 +2,6 @@
 
 include: package:extra_pedantic/analysis_options.yaml
 analyzer:
-  exclude:
-    - '**/*.freezed.dart'
-    - '**/*.g.dart'
   errors:
     # error
     always_declare_return_types: error
