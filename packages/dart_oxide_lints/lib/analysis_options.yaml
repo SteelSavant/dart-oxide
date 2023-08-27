@@ -72,6 +72,7 @@ analyzer:
 
 linter:
   rules:
+    avoid_relative_lib_imports: true # Makes imports more explicit.
     deprecated_member_use_from_same_package: true # Avoid using deprecated code.
     implicit_reopen: true # Avoids accidentally reopening a class, potentially violating invariants.
     invalid_case_patterns: true # Avoids unintended behavior due to syntax ambiguity.
@@ -90,7 +91,7 @@ linter:
     no_literal_bool_comparisons: true # Less verbose.
     non_constant_identifier_names: true # Recommended style.
     prefer_const_literals_to_create_immutables: true # Better performance.
-    prefer_expression_function_bodies: true # Less verbose.
+    prefer_expression_function_bodies: false # False positives with comments. Too pedantic
     prefer_if_elements_to_conditional_expressions: true # Less verbose.
     prefer_interpolation_to_compose_strings: true # Less verbose.
     prefer_is_not_operator: true # Less verbose.

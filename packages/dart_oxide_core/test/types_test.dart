@@ -614,7 +614,7 @@ void main() {
       final x = [
         const Option.some(1),
         const Option<int>.none(),
-        const Option.some(2)
+        const Option.some(2),
       ];
 
       expect(x.whereSome()).toEqual([1, 2]);
@@ -624,7 +624,7 @@ void main() {
       final x = [
         const Option.some(1),
         const Option<int>.none(),
-        const Option.some(2)
+        const Option.some(2),
       ];
 
       expect(x.whereSomeAnd((final x) => x == 1)).toEqual([1]);
@@ -634,7 +634,7 @@ void main() {
       final x = [
         const Option.some(1),
         const Option<int>.none(),
-        const Option.some(2)
+        const Option.some(2),
       ];
 
       expect(x.mapWhereSome((final x) => x + 1)).toEqual([2, 3]);
@@ -650,7 +650,7 @@ void main() {
       final x = [
         const Option.some(1),
         const Option<int>.none(),
-        const Option.some(2)
+        const Option.some(2),
       ];
 
       expect(x.collectOption()).toEqual(const Option.none());
@@ -717,7 +717,7 @@ void main() {
           const Option<int>.none(),
           const Option<int>.none(),
           const Option.some(1),
-          const Option.some(2)
+          const Option.some(2),
         ],
       );
 
@@ -1335,7 +1335,7 @@ void main() {
     test('Test Iterable<Result<T, E>> whereOk', () {
       final x = [
         const Result<int, String>.ok(1),
-        const Result<int, String>.err('Error')
+        const Result<int, String>.err('Error'),
       ];
 
       expect(x.whereOk()).toEqual([1]);
@@ -1344,7 +1344,7 @@ void main() {
     test('Test Iterable<Result<T, E>> whereOkAnd', () {
       final x = [
         const Result<int, String>.ok(1),
-        const Result<int, String>.err('Error')
+        const Result<int, String>.err('Error'),
       ];
 
       expect(x.whereOkAnd((final x) => x == 1)).toEqual([1]);
@@ -1353,7 +1353,7 @@ void main() {
     test('Test Iterable<Result<T, E>> collectResult no errors', () {
       final x = [
         const Result<int, String>.ok(1),
-        const Result<int, String>.ok(2)
+        const Result<int, String>.ok(2),
       ];
 
       expect(x.collectResult()).toEqual(const Result.ok([1, 2]));
@@ -1362,7 +1362,7 @@ void main() {
     test('Test Iterable<Result<T, E>> collectResult with errors', () {
       final x = [
         const Result<int, String>.ok(1),
-        const Result<int, String>.err('Error')
+        const Result<int, String>.err('Error'),
       ];
 
       expect(x.collectResult()).toEqual(const Result.err('Error'));
@@ -1372,7 +1372,7 @@ void main() {
       final x = Stream.fromIterable(
         [
           const Result<int, String>.ok(1),
-          const Result<int, String>.err('Error')
+          const Result<int, String>.err('Error'),
         ],
       );
 
@@ -1383,7 +1383,7 @@ void main() {
       final x = Stream.fromIterable(
         [
           const Result<int, String>.ok(1),
-          const Result<int, String>.err('Error')
+          const Result<int, String>.err('Error'),
         ],
       );
 
@@ -1397,7 +1397,7 @@ void main() {
         [
           const Result<int, String>.ok(1),
           const Result<int, String>.ok(2),
-          const Result<int, String>.err('Error')
+          const Result<int, String>.err('Error'),
         ],
       );
 
@@ -1411,7 +1411,7 @@ void main() {
         [
           const Result<int, String>.ok(1),
           const Result<int, String>.err('Error'),
-          const Result<int, String>.ok(2)
+          const Result<int, String>.ok(2),
         ],
       );
 
@@ -1424,7 +1424,7 @@ void main() {
           const Result<int, String>.err('Error'),
           const Result<int, String>.ok(1),
           const Result<int, String>.err('Error2'),
-          const Result<int, String>.ok(2)
+          const Result<int, String>.ok(2),
         ],
       );
 
@@ -1448,7 +1448,7 @@ void main() {
         [
           const Result<int, String>.ok(1),
           const Result<int, String>.err('Error'),
-          const Result<int, String>.ok(2)
+          const Result<int, String>.ok(2),
         ],
       );
 
