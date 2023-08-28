@@ -2,12 +2,22 @@ import 'dart:async';
 
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:stack_trace/stack_trace.dart';
+import 'package:synchronized/synchronized.dart';
 
 import '../../types.dart';
 
 part 'ptr.freezed.dart';
 
 () _unitFn(final void _) => ();
+
+class AlreadyLockedError extends StateError {
+  AlreadyLockedError() : super('lock is already held');
+}
+
+class AlreadyDisposedError extends StateError {
+  AlreadyDisposedError([final String? msg])
+      : super(msg ?? 'object is already disposed');
+}
 
 /// An interface for defining a class that can be disposed, (possibly) asynchronously.
 ///
@@ -107,8 +117,42 @@ abstract final class BaseBox<T extends Object, U extends FutureOr<()>>
   @pragma('dart2js:tryInline')
   String get _errorMsg =>
       'cannot use object after being disposed: $T first disposed at $_disposedTime from $_disposedTrace';
+  T _unwrap() => _value ??= throw AlreadyDisposedError(_errorMsg);
 
-  /// Returns a [Result] containing the protected object, or a [StateError] if the object is disposed.
+  @pragma('vm:prefer-inline')
+  @pragma('dart2js:tryInline')
+  T _dispose() {
+    final value = _unwrap();
+    _finalizer.detach(this);
+    _value = null;
+    _disposedTime = DateTime.now();
+    _disposedTrace = Trace.current();
+    return value;
+  }
+
+  /// Disposes this box the protected object, preventing further use.
+  ///
+  /// # Throws
+  ///
+  /// Throws a [AlreadyDisposedError] if the object has already been disposed.
+  ///
+  /// # Examples
+  ///
+  /// ```
+  /// final box = Box(1);
+  /// box.dispose();
+  /// box.unwrap(); // throws AlreadyDisposedError
+  /// ```
+  @pragma('vm:prefer-inline')
+  @pragma('dart2js:tryInline')
+  @override
+  U dispose() => _drop(_dispose());
+}
+
+@internal
+base mixin BaseBoxValueMixin<T extends Object, U extends FutureOr<()>>
+    on BaseBox<T, U> {
+  /// Returns a [Result] containing the protected object, or a [AlreadyDisposedError] if the object is disposed.
   ///
   /// # Examples
   ///
@@ -127,14 +171,16 @@ abstract final class BaseBox<T extends Object, U extends FutureOr<()>>
   @doNotStore
   Result<T, StateError> get value {
     final value = this._value;
-    return value != null ? Result.ok(value) : Result.err(StateError(_errorMsg));
+    return value != null
+        ? Result.ok(value)
+        : Result.err(AlreadyDisposedError(_errorMsg));
   }
 
-  /// Returns the protected object, or throws a [StateError] if the object is disposed.
+  /// Returns the protected object, or throws a [AlreadyDisposedError] if the object is disposed.
   ///
   /// # Throws
   ///
-  /// Throws a [StateError] if the object is disposed.
+  /// Throws a [AlreadyDisposedError] if the object is disposed.
   ///
   /// # Examples
   ///
@@ -143,15 +189,15 @@ abstract final class BaseBox<T extends Object, U extends FutureOr<()>>
   /// assert(box.unwrap() == 1);
   ///
   /// box.dispose();
-  /// box.unwrap(); // throws StateError
+  /// box.unwrap(); // throws AlreadyDisposedError
   /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   @useResult
   @doNotStore
-  T unwrap() => _value ??= throw StateError(_errorMsg);
+  T unwrap() => _unwrap();
 
-  /// Returns the protected object, or throws a [StateError] with the provided
+  /// Returns the protected object, or throws a [AlreadyDisposedError] with the provided
   /// [msg]. If [includeTrace] is true, the stack trace of the first call to
   /// [dispose] will be included in the error message. If [includeDisposeTime]
   /// is true, the time of the first call to [dispose] will be included in
@@ -159,7 +205,7 @@ abstract final class BaseBox<T extends Object, U extends FutureOr<()>>
   ///
   /// # Throws
   ///
-  /// Throws a [StateError] if the object has already been disposed.
+  /// Throws a [AlreadyDisposedError] if the object has already been disposed.
   ///
   /// # Examples
   ///
@@ -167,7 +213,7 @@ abstract final class BaseBox<T extends Object, U extends FutureOr<()>>
   /// final box = Box(1);
   /// assert(box.expect('box is not disposed') == 1);
   /// box.dispose();
-  /// box.expect('box is not disposed'); // throws StateError
+  /// box.expect('box is not disposed'); // throws AlreadyDisposedError
   /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
@@ -179,51 +225,22 @@ abstract final class BaseBox<T extends Object, U extends FutureOr<()>>
     final bool includeDisposeTime = false,
   }) =>
       _value ??= switch ((includeTrace, includeDisposeTime)) {
-        (true, true) => throw StateError(
+        (true, true) => throw AlreadyDisposedError(
             '$msg: $_errorMsg',
           ),
-        (true, false) => throw StateError(
+        (true, false) => throw AlreadyDisposedError(
             '$msg: $T first disposed from $_disposedTrace',
           ),
-        (false, true) => throw StateError(
+        (false, true) => throw AlreadyDisposedError(
             '$msg: $T first disposed at $_disposedTime',
           ),
-        (false, false) => throw StateError(msg),
+        (false, false) => throw AlreadyDisposedError(msg),
       };
-
-  @pragma('vm:prefer-inline')
-  @pragma('dart2js:tryInline')
-  T _dispose() {
-    final value = unwrap();
-    _finalizer.detach(this);
-    _value = null;
-    _disposedTime = DateTime.now();
-    _disposedTrace = Trace.current();
-    return value;
-  }
-
-  /// Disposes this box the protected object, preventing further use.
-  ///
-  /// # Throws
-  ///
-  /// Throws a [StateError] if the object has already been disposed.
-  ///
-  /// # Examples
-  ///
-  /// ```
-  /// final box = Box(1);
-  /// box.dispose();
-  /// box.unwrap(); // throws StateError
-  /// ```
-  @pragma('vm:prefer-inline')
-  @pragma('dart2js:tryInline')
-  @override
-  U dispose() => _drop(_dispose());
 }
 
 /// Protects a value that needs to be disposed, and tracks whether or not it has been disposed.
-final class Box<T extends Object, U extends FutureOr<()>>
-    extends BaseBox<T, U> {
+final class Box<T extends Object, U extends FutureOr<()>> extends BaseBox<T, U>
+    with BaseBoxValueMixin<T, U> {
   /// Creates a new [Box] that points to the provided value. When this box is disposed,
   /// [super.onDispose] will be called on [value]. If [super.finalize] is true, this [Box]
   /// will be attached to a finalizer, which will dispose this [Box] when it becomes unreachable.
@@ -301,7 +318,7 @@ final class Box<T extends Object, U extends FutureOr<()>>
 /// underlying value is disposed. [()] is used instead of [void] to prevent
 /// the return type from unifying to [void] instead of [FutureOr<void>].
 final class Rc<T extends Object, U extends FutureOr<()>> extends BaseBox<T, U>
-    implements IFutureDisposable<U> {
+    with BaseBoxValueMixin<T, U> {
   Ptr<int> _count = Ptr(1);
   final bool _finalize;
 
@@ -395,7 +412,7 @@ final class Rc<T extends Object, U extends FutureOr<()>> extends BaseBox<T, U>
   ///
   /// # Throws
   ///
-  /// Throws a [StateError] if this is already disposed.
+  /// Throws a [AlreadyDisposedError] if this is already disposed.
   ///
   /// # Examples
   ///
@@ -424,7 +441,7 @@ final class Rc<T extends Object, U extends FutureOr<()>> extends BaseBox<T, U>
   ///
   /// # Throws
   ///
-  /// Throws a [StateError] if this is already disposed.
+  /// Throws a [AlreadyDisposedError] if this is already disposed.
   ///
   /// # Examples
   ///
@@ -432,8 +449,8 @@ final class Rc<T extends Object, U extends FutureOr<()>> extends BaseBox<T, U>
   /// final IDisposable x = ...; // some disposable object
   /// final rc = Rc(x);
   /// rc.dispose();
-  /// rc.unwrap(); // throws StateError
-  /// x.unwrap(); // throws StateError
+  /// rc.unwrap(); // throws AlreadyDisposedError
+  /// x.unwrap(); // throws AlreadyDisposedError
   /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
@@ -454,6 +471,331 @@ final class Rc<T extends Object, U extends FutureOr<()>> extends BaseBox<T, U>
       }
     }
   }
+}
+
+/// Like a [LockBox], but additionally allows attempting to access the protected value without
+/// acquiring the lock. If the lock is held, the access will fail.
+final class LooseLockBox<T extends Object, U extends FutureOr<()>>
+    extends BaseBox<T, U>
+    with BaseBoxValueMixin<T, U>
+    implements LockBox<T, U> {
+  final Lock _lock;
+
+  /// Returns true if the lock is currently locked.
+  @override
+  bool get locked => _lock.locked;
+
+  /// For reentrant, test whether we are currently in the synchronized section.
+  /// For non reentrant, it returns the [locked] status.
+  @override
+  bool get inLock => _lock.inLock;
+
+  /// Creates a new [LooseLockBox] that points to the provided value. When this box is disposed,
+  /// [super.onDispose] will be called on [value]. If [super.finalize] is true, this [LooseLockBox]
+  /// will be attached to a finalizer, which will dispose this [LooseLockBox] when it becomes unreachable.
+  ///
+  /// Due to the nature of [Finalizer], [super.onDispose] is not guaranteed to be invoked.
+  LooseLockBox(
+    super.value, {
+    required super.onDispose,
+    super.finalize,
+    final bool reentrant = false,
+  })  : _lock = Lock(reentrant: reentrant),
+        super();
+
+  /// Creates a new [LooseLockBox] that points to the provided value. The value will
+  /// not be disposed when this [LooseLockBox] is disposed. Primarily useful
+  /// for storing a value in a collection of [LooseLockBox]s, or for tracking the
+  /// lifetime/usage of a value at runtime.
+  @pragma('vm:prefer-inline')
+  @pragma('dart2js:tryInline')
+  @useResult
+  static LooseLockBox<T, ()> fromValue<T extends Object>(
+    final T value, {
+    final bool reentrant = false,
+  }) =>
+      LooseLockBox(
+        value,
+        onDispose: _unitFn,
+        finalize: false,
+        reentrant: reentrant,
+      );
+
+  /// Creates a new [LooseLockBox] that points to the provided value. The [IDisposable]
+  /// will be disposed when this [LooseLockBox] is disposed. If [finalize] is true,
+  /// this [LooseLockBox] will be attached to a finalizer, which will dispose [value]
+  /// when this [LooseLockBox] becomes unreachable.
+  ///
+  /// Due to the nature of [Finalizer], [value.dispose()] is not guaranteed to be invoked.
+  ///
+  /// # Undefined Behavior
+  ///
+  /// Disposing [value] from outside of this [LooseLockBox] is undefined behavior, and
+  /// may result in a double free, or cause arbitrary methods to throw.
+  @pragma('vm:prefer-inline')
+  @pragma('dart2js:tryInline')
+  @useResult
+  static LooseLockBox<T, ()> fromDisposable<T extends IDisposable>(
+    final T value, {
+    final bool finalize = true,
+    final bool reentrant = false,
+  }) =>
+      LooseLockBox(
+        value,
+        onDispose: (final T v) => v.dispose(),
+        finalize: finalize,
+        reentrant: reentrant,
+      );
+
+  /// Creates a new [LooseLockBox] that points to the provided value. The [IFutureDisposable]
+  /// will be disposed when this [LooseLockBox] is disposed. If [finalize] is true,
+  /// this [LooseLockBox] will be attached to a finalizer, which will dispose [value]
+  /// when this [LooseLockBox] becomes unreachable.
+  ///
+  /// Due to the nature of [Finalizer], [IFutureDisposable.dispose] is not guaranteed to be invoked.
+  ///
+  /// # Undefined Behavior
+  ///
+  /// Disposing [value] from outside of this [LooseLockBox] is undefined behavior, and
+  /// may result in a double free, or cause arbitrary methods to throw.
+  static LooseLockBox<T, U> fromAsyncDisposable<T extends IFutureDisposable<U>,
+          U extends FutureOr<()>>(
+    final T value, {
+    final bool finalize = true,
+    final bool reentrant = false,
+  }) =>
+      LooseLockBox(
+        value,
+        onDispose: (final T v) => v.dispose(),
+        finalize: finalize,
+        reentrant: reentrant,
+      );
+
+  /// Returns a [Result] containing the protected object, or an
+  /// [AlreadyDisposedError] if the object is disposed, or an
+  /// [AlreadyLockedError] if the [LooseLockBox] is locked.
+  ///
+  /// # Examples
+  ///
+  /// ```
+  /// final box = Box(1);
+  /// final result = box.value;
+  /// assert(result.isOk);
+  ///
+  /// box.dispose();
+  /// final result2 = box.value;
+  /// assert(result2.isErr);
+  /// ```
+  @pragma('vm:prefer-inline')
+  @pragma('dart2js:tryInline')
+  @useResult
+  @doNotStore
+  @override
+  Result<T, StateError> get value {
+    if (_lock.locked && !_lock.inLock) {
+      return Result.err(AlreadyLockedError());
+    }
+
+    return super.value;
+  }
+
+  /// Returns the protected object, or throws an
+  /// [AlreadyDisposedError] if the object is disposed, or an
+  /// [AlreadyLockedError] if the [LooseLockBox] is locked.
+  ///
+  /// # Throws
+  ///
+  /// Throws a [AlreadyDisposedError] if the object is disposed.
+  /// Throws a [AlreadyLockedError] if the [LooseLockBox] is locked.
+  ///
+  /// # Examples
+  ///
+  /// ```
+  /// final box = Box(1);
+  /// assert(box.unwrap() == 1);
+  ///
+  /// box.dispose();
+  /// box.unwrap(); // throws AlreadyDisposedError
+  /// ```
+  @pragma('vm:prefer-inline')
+  @pragma('dart2js:tryInline')
+  @useResult
+  @doNotStore
+  @override
+  T unwrap() => _lock.locked && !_lock.inLock
+      ? throw AlreadyLockedError()
+      : super.unwrap();
+
+  /// Returns the protected object, or throws a [AlreadyDisposedError] or [AlreadyLockedError] with the provided
+  /// [msg]. If [includeTrace] is true, the stack trace of the first call to
+  /// [dispose] will be included in the error message. If [includeDisposeTime]
+  /// is true, the time of the first call to [dispose] will be included in
+  /// the error message.
+  ///
+  /// # Throws
+  ///
+  /// Throws a [AlreadyDisposedError] if the object has already been disposed.
+  /// Throws a [AlreadyLockedError] if the [LooseLockBox] is locked.
+  ///
+  /// # Examples
+  ///
+  /// ```
+  /// final box = Box(1);
+  /// assert(box.expect('box is not disposed') == 1);
+  /// box.dispose();
+  /// box.expect('box is not disposed'); // throws AlreadyDisposedError
+  /// ```
+  @pragma('vm:prefer-inline')
+  @pragma('dart2js:tryInline')
+  @useResult
+  @doNotStore
+  @override
+  T expect(
+    final String msg, {
+    final bool includeTrace = false,
+    final bool includeDisposeTime = false,
+  }) =>
+      super.expect(
+        msg,
+        includeTrace: includeTrace,
+        includeDisposeTime: includeDisposeTime,
+      );
+
+  /// Runs [fn] with a lock on the protected object once the lock can be acquired.
+  /// Returns a [Result] containing the result of [fn], or a [AlreadyDisposedError] if the object is disposed.
+  @override
+  Future<Result<R, AlreadyDisposedError>> lock<R>(
+    final FutureOr<R> Function(T) fn,
+  ) =>
+      _lock.synchronized(
+        () async => _value == null
+            ? Result.ok(await fn(_value!))
+            : Result.err(AlreadyDisposedError(_errorMsg)),
+      );
+
+  /// If the lock is not currently held, runs [fn] with a lock on the protected object.
+  /// Returns a [Result] containing the result of [fn], or a [AlreadyDisposedError] if the object is disposed.
+  @override
+  Future<Result<R, StateError>> tryLock<R>(final FutureOr<R> Function(T) fn) {
+    if (_lock.locked && !_lock.inLock) {
+      return Future.value(
+        Result.err(AlreadyLockedError()),
+      );
+    } else {
+      return _lock.synchronized(
+        () async => _value == null
+            ? Result.ok(await fn(_value!))
+            : Result.err(AlreadyDisposedError(_errorMsg)),
+      );
+    }
+  }
+
+  LockBox<T, U> get tightened => this;
+
+  @override
+  _BoxFinalizable<T> _createFinalizable() => _BoxFinalizable(
+        value: unwrap(),
+        onFinalize: _drop,
+      );
+
+  @override
+  LooseLockBox<T, U> get loosened => this;
+}
+
+abstract final class LockBox<T extends Object, U extends FutureOr<()>>
+    implements BaseBox<T, U> {
+  bool get locked;
+  bool get inLock;
+  Future<Result<R, StateError>> lock<R>(final FutureOr<R> Function(T) fn);
+  Future<Result<R, StateError>> tryLock<R>(final FutureOr<R> Function(T) fn);
+
+  /// Creates a new [LockBox] that points to the provided value. When this box is disposed,
+  /// [super.onDispose] will be called on [value]. If [super.finalize] is true, this [LockBox]
+  /// will be attached to a finalizer, which will dispose this [LockBox] when it becomes unreachable.
+  ///
+  /// Due to the nature of [Finalizer], [super.onDispose] is not guaranteed to be invoked.
+  factory LockBox(
+    final T value, {
+    required final U Function(T) onDispose,
+    final bool finalize = true,
+    final bool reentrant = false,
+  }) =>
+      LooseLockBox(
+        value,
+        onDispose: onDispose,
+        finalize: finalize,
+        reentrant: reentrant,
+      );
+
+  /// Creates a new [LockBox] that points to the provided value. The value will
+  /// not be disposed when this [LockBox] is disposed. Primarily useful
+  /// for storing a value in a collection of [LockBox]s, or for tracking the
+  /// lifetime/usage of a value at runtime.
+  @pragma('vm:prefer-inline')
+  @pragma('dart2js:tryInline')
+  @useResult
+  static LockBox<T, ()> fromValue<T extends Object>(
+    final T value, {
+    final bool reentrant = false,
+  }) =>
+      LooseLockBox(
+        value,
+        onDispose: _unitFn,
+        finalize: false,
+        reentrant: reentrant,
+      );
+
+  /// Creates a new [LockBox] that points to the provided value. The [IDisposable]
+  /// will be disposed when this [LockBox] is disposed. If [finalize] is true,
+  /// this [LockBox] will be attached to a finalizer, which will dispose [value]
+  /// when this [LockBox] becomes unreachable.
+  ///
+  /// Due to the nature of [Finalizer], [value.dispose()] is not guaranteed to be invoked.
+  ///
+  /// # Undefined Behavior
+  ///
+  /// Disposing [value] from outside of this [LockBox] is undefined behavior, and
+  /// may result in a double free, or cause arbitrary methods to throw.
+  @pragma('vm:prefer-inline')
+  @pragma('dart2js:tryInline')
+  @useResult
+  static LockBox<T, ()> fromDisposable<T extends IDisposable>(
+    final T value, {
+    final bool finalize = true,
+    final bool reentrant = false,
+  }) =>
+      LooseLockBox(
+        value,
+        onDispose: (final T v) => v.dispose(),
+        finalize: finalize,
+        reentrant: reentrant,
+      );
+
+  /// Creates a new [LockBox] that points to the provided value. The [IFutureDisposable]
+  /// will be disposed when this [LockBox] is disposed. If [finalize] is true,
+  /// this [LockBox] will be attached to a finalizer, which will dispose [value]
+  /// when this [LockBox] becomes unreachable.
+  ///
+  /// Due to the nature of [Finalizer], [IFutureDisposable.dispose] is not guaranteed to be invoked.
+  ///
+  /// # Undefined Behavior
+  ///
+  /// Disposing [value] from outside of this [LockBox] is undefined behavior, and
+  /// may result in a double free, or cause arbitrary methods to throw.
+  static LockBox<T, U> fromAsyncDisposable<T extends IFutureDisposable<U>,
+          U extends FutureOr<()>>(
+    final T value, {
+    final bool finalize = true,
+    final bool reentrant = false,
+  }) =>
+      LooseLockBox(
+        value,
+        onDispose: (final T v) => v.dispose(),
+        finalize: finalize,
+        reentrant: reentrant,
+      );
+
+  LooseLockBox<T, U> get loosened => this as LooseLockBox<T, U>;
 }
 
 /// A pointer to a value. A mutable wrapper around a value to allow the internal
