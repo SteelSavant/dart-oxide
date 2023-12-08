@@ -1,7 +1,6 @@
+import 'package:dart_oxide_core/src/types/result/result.dart';
+import 'package:dart_oxide_core/src/types/single_element_iterator.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-
-import '../result/result.dart';
-import '../single_element_iterator.dart';
 
 part 'option.freezed.dart';
 

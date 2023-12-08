@@ -1,6 +1,6 @@
 import 'dart:collection';
 
-import 'option/option.dart';
+import 'package:dart_oxide_core/src/types/option/option.dart';
 
 class SingleElementIter<T> with IterableMixin<T> {
   final Option<T> _option;

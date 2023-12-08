@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import '../../../types.dart';
+import 'package:dart_oxide_core/types.dart';
 
 extension IterableResultExt<R, E> on Iterable<Result<R, E>> {
   /// Filters the [Iterable] to only [Ok] values, returns an [Iterable] containing

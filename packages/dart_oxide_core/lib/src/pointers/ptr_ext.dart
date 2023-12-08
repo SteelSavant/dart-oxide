@@ -1,9 +1,8 @@
 import 'dart:async';
 
+import 'package:dart_oxide_core/src/pointers/ptr.dart';
+import 'package:dart_oxide_core/types.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-
-import '../../types.dart';
-import 'ptr.dart';
 // TODO::annotation to force users to box/cell constructed disposable types
 
 /// Runs the given [action] with the given [resource] and then disposes it.

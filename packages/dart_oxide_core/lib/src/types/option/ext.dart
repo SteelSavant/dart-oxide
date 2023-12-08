@@ -1,4 +1,4 @@
-import '../../../types.dart';
+import 'package:dart_oxide_core/types.dart';
 
 /// Extensions on [T?] to convert to [Option<T>].
 extension NullableToOptionExt<T> on T? {

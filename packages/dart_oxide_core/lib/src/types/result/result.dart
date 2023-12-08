@@ -1,9 +1,8 @@
 import 'dart:async';
 
+import 'package:dart_oxide_core/src/types/option/option.dart';
+import 'package:dart_oxide_core/src/types/single_element_iterator.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-
-import '../option/option.dart';
-import '../single_element_iterator.dart';
 
 part 'result.freezed.dart';
 

@@ -1,10 +1,9 @@
 import 'dart:async';
 
+import 'package:dart_oxide_core/types.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:stack_trace/stack_trace.dart';
 import 'package:synchronized/synchronized.dart';
-
-import '../../types.dart';
 
 part 'ptr.freezed.dart';
 
