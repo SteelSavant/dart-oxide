@@ -158,18 +158,18 @@ base mixin BaseBoxValueMixin<T extends Object, U extends FutureOr<()>>
   ///
   /// ```
   /// final box = Box(1);
-  /// final result = box.value;
+  /// final result = box.tryValue();
   /// assert(result.isOk);
   ///
   /// box.dispose();
-  /// final result2 = box.value;
+  /// final result2 = box.tryValue();
   /// assert(result2.isErr);
   /// ```
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   @useResult
   @doNotStore
-  Result<T, StateError> get value {
+  Result<T, StateError> tryValue() {
     final value = this._value;
     return value != null
         ? Result.ok(value)
@@ -242,7 +242,7 @@ base mixin BaseBoxValueMixin<T extends Object, U extends FutureOr<()>>
 final class Box<T extends Object, U extends FutureOr<()>> extends BaseBox<T, U>
     with BaseBoxValueMixin<T, U> {
   /// Creates a new [Box] that points to the provided value. When this box is disposed,
-  /// [super.onDispose] will be called on [value]. If [super.finalize] is true, this [Box]
+  /// [super.onDispose] will be called on [tryValue]. If [super.finalize] is true, this [Box]
   /// will be attached to a finalizer, which will dispose this [Box] when it becomes unreachable.
   ///
   /// Due to the nature of [Finalizer], [super.onDispose] is not guaranteed to be invoked.
@@ -323,7 +323,7 @@ final class Rc<T extends Object, U extends FutureOr<()>> extends BaseBox<T, U>
   final bool _finalize;
 
   /// Creates a new [Rc] that points to the provided value. When all references
-  /// to the value are dropped, [super.onDispose] will be called on [value]. If [super.finalize]
+  /// to the value are dropped, [super.onDispose] will be called on [tryValue]. If [super.finalize]
   /// is true, this [Rc] will be attached to a finalizer, which will dispose
   /// this [Rc] when it becomes unreachable.
   ///
@@ -437,7 +437,7 @@ final class Rc<T extends Object, U extends FutureOr<()>> extends BaseBox<T, U>
     );
   }
 
-  /// Disposes this [Rc] and decrements the reference count. If this is the last reference to [value], [value] is also disposed.
+  /// Disposes this [Rc] and decrements the reference count. If this is the last reference to [tryValue], [tryValue] is also disposed.
   ///
   /// # Throws
   ///
@@ -491,7 +491,7 @@ final class LooseLockBox<T extends Object, U extends FutureOr<()>>
   bool get inLock => _lock.inLock;
 
   /// Creates a new [LooseLockBox] that points to the provided value. When this box is disposed,
-  /// [super.onDispose] will be called on [value]. If [super.finalize] is true, this [LooseLockBox]
+  /// [super.onDispose] will be called on [tryValue]. If [super.finalize] is true, this [LooseLockBox]
   /// will be attached to a finalizer, which will dispose this [LooseLockBox] when it becomes unreachable.
   ///
   /// Due to the nature of [Finalizer], [super.onDispose] is not guaranteed to be invoked.
@@ -591,12 +591,12 @@ final class LooseLockBox<T extends Object, U extends FutureOr<()>>
   @useResult
   @doNotStore
   @override
-  Result<T, StateError> get value {
+  Result<T, StateError> tryValue() {
     if (_lock.locked && !_lock.inLock) {
       return Result.err(AlreadyLockedError());
     }
 
-    return super.value;
+    return super.tryValue();
   }
 
   /// Returns the protected object, or throws an
@@ -622,7 +622,7 @@ final class LooseLockBox<T extends Object, U extends FutureOr<()>>
   @useResult
   @doNotStore
   @override
-  T unwrap() => _lock.locked && !_lock.inLock
+  T unwrapLock() => _lock.locked && !_lock.inLock
       ? throw AlreadyLockedError()
       : super.unwrap();
 
@@ -708,6 +708,7 @@ abstract final class LockBox<T extends Object, U extends FutureOr<()>>
   bool get inLock;
   Future<Result<R, StateError>> lock<R>(final FutureOr<R> Function(T) fn);
   Future<Result<R, StateError>> tryLock<R>(final FutureOr<R> Function(T) fn);
+  T unwrapLock();
 
   /// Creates a new [LockBox] that points to the provided value. When this box is disposed,
   /// [super.onDispose] will be called on [value]. If [super.finalize] is true, this [LockBox]
